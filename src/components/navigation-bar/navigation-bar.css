@@ -1,0 +1,34 @@
+.navigation-bar {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  width: 6rem;
+}
+
+.routes {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.routes>a {
+  padding: 0.5rem .75rem;
+  margin: 0 1rem;
+  min-width: 12rem;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.6rem;
+  text-decoration: none;
+  color: #202020;
+  transition: 0.2s ease-in-out;
+  border-radius: .25rem;
+}
+
+.routes>a:hover {
+  background-color: rgba(125, 125, 125, .075);
+}

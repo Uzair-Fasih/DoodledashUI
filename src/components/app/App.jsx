@@ -1,16 +1,18 @@
-import './App.css';
+import "./App.css";
 
-import Canvas from '../functional/canvas/Canvas';
+import NavigationBar from "../navigation-bar/NavigationBar";
+import Canvas from "../functional/canvas/Canvas";
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <Canvas />
+        <NavigationBar />
       </header>
+      <div className="App-body">
+        <p className="canvas-title">The beginning</p>
+        <Canvas />
+      </div>
     </div>
   );
 }

@@ -3,9 +3,12 @@
  * The canvas should be workable on any screen size. The size of the canvas is the standard size for NFTs
  */
 
-import { useEffect, useRef } from "react";
 import _ from "lodash";
+import React, { useEffect, useRef } from "react";
 import CanvasActions from "./canvasActions";
+import canvasData from "../../../test/canvasData.json";
+
+import "./canvas.css";
 
 const canvasProps = {
   height: 540,
@@ -19,7 +22,10 @@ export default function Canvas() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    actions.current = new CanvasActions(canvas, canvasProps);
+    actions.current = new CanvasActions(canvas, {
+      ...canvasProps,
+      init: canvasData,
+    });
     const handler = getHandler(actions.current);
 
     canvas.addEventListener("mousedown", handler.mousedown, false);
