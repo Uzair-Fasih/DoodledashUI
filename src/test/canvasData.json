@@ -2,9 +2,11 @@
   "title": "The Beginning",
   "contributors": [
     {
-      "id": 1,
-      "walletAddress": "0x186800b7e090271c922450C47Ad30C2702C7bfE9",
-      "createdAt": "2022-05-27T19:34:23.208Z",
+      "meta": {
+        "id": 1,
+        "walletAddress": "0x186800b7e090271c922450C47Ad30C2702C7bfE9",
+        "createdAt": "2022-05-27T19:34:23.208Z"
+      },
       "drawing": {
         "type": "line",
         "startX": 24,
@@ -14,9 +16,11 @@
       }
     },
     {
-      "id": 2,
-      "walletAddress": "0x286800b7e090271c922450C47Ad30C2702C7bfE9",
-      "createdAt": "2022-05-30T19:34:23.208Z",
+      "meta": {
+        "id": 2,
+        "walletAddress": "0x286800b7e090271c922450C47Ad30C2702C7bfE9",
+        "createdAt": "2022-05-30T19:34:23.208Z"
+      },
       "drawing": {
         "type": "line",
         "startX": 204,
@@ -26,9 +30,11 @@
       }
     },
     {
-      "id": 3,
-      "walletAddress": "0x386800b7e090271c922450C47Ad30C2702C7bfE9",
-      "createdAt": "2022-06-27T19:34:23.208Z",
+      "meta": {
+        "id": 3,
+        "walletAddress": "0x386800b7e090271c922450C47Ad30C2702C7bfE9",
+        "createdAt": "2022-06-27T19:34:23.208Z"
+      },
       "drawing": {
         "type": "line",
         "startX": 214,

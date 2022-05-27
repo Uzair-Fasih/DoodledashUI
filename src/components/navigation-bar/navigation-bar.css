@@ -32,3 +32,9 @@
 .routes>a:hover {
   background-color: rgba(125, 125, 125, .075);
 }
+
+@media screen and (max-width: 825px) {
+  .routes {
+    display: none;
+  }
+}

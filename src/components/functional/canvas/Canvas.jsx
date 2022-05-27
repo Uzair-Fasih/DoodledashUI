@@ -4,28 +4,39 @@
  */
 
 import _ from "lodash";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CanvasActions from "./canvasActions";
-import canvasData from "../../../test/canvasData.json";
 
 import "./canvas.css";
 
-const canvasProps = {
-  height: 540,
-  width: 540,
-  style: { backgroundColor: "#f8f9fa" },
+const meta = {
+  walletAddress: "0x686800b7e090271c922450C47Ad30C2702C7bfE9",
+  createdAt: new Date().toJSON(),
 };
 
-export default function Canvas() {
+export default function Canvas({ contributors }) {
   const canvasRef = useRef();
   const actions = useRef();
+  const [selectedLine, setSelectedLine] = useState({});
+  const [showConfirm, toggleConfirm] = useState({});
+
+  const canvasProps = {
+    height: 540,
+    width: 540,
+    style: { backgroundColor: "#f8f9fa" },
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     actions.current = new CanvasActions(canvas, {
       ...canvasProps,
-      init: canvasData,
+      colors: { accent: "red", regular: "black" },
+      initData: contributors,
+      setPopupStatus: setSelectedLine,
+      toggleConfirm,
+      meta,
     });
+
     const handler = getHandler(actions.current);
 
     canvas.addEventListener("mousedown", handler.mousedown, false);
@@ -47,12 +58,34 @@ export default function Canvas() {
       canvas.removeEventListener("mouseup", handler.mouseup, false);
       canvas.removeEventListener("touchend", handler.touchend, false);
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSelectedLine, contributors]);
 
   return (
-    <canvas ref={canvasRef} id="mystery-machine" {...canvasProps}></canvas>
+    <React.Fragment>
+      {!_.isEmpty(showConfirm) && <ConfirmationPrompt data={showConfirm} />}
+      {!_.isEmpty(selectedLine) && <PopupTip data={selectedLine} />}
+      <canvas ref={canvasRef} id="mystery-machine" {...canvasProps}></canvas>
+    </React.Fragment>
   );
 }
+
+const PopupTip = ({ data }) => {
+  const { clientX, clientY } = data.event.nativeEvent;
+  return (
+    <div
+      className="popup"
+      style={{
+        left: `${clientX + 20}px`,
+        top: `${clientY}px`,
+      }}
+    >
+      <p>Added by:</p>
+      <p>{data.walletAddress}</p>
+      <p>{data.createdAt}</p>
+    </div>
+  );
+};
 
 const getHandler = (actions) => {
   const handler = {
@@ -94,4 +127,19 @@ const getHandler = (actions) => {
   };
 
   return _.merge({}, handler, touchHander);
+};
+
+const ConfirmationPrompt = ({ data }) => {
+  const { callback = _.noop } = data;
+  return (
+    <div className="confirmation">
+      Are you sure you'd like to set this line?
+      <div className="confirmation-call-to-actions">
+        <button onClick={() => callback(true)}>Continue</button>
+        <button className="secondary" onClick={() => callback(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 };
