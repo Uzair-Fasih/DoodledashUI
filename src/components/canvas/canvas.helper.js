@@ -12,7 +12,7 @@ export const initState = {
   isLocked: false,
   isMobile: false,
   lockType: null,
-  availableAt: d.toJSON(), //"2022-05-28T11:10:32.082Z", //
+  availableAt: "2022-05-28T11:10:32.082Z", // d.toJSON(), //, //
   renderKey: 0,
 };
 
@@ -41,7 +41,7 @@ export const reducer = (state, { type, payload }) => {
         isMobile: payload,
       });
     case "render":
-      console.log("forcing render");
+      console.info("forcing render");
       return Object.assign({}, state, {
         renderKey: state.renderKey + 1,
       });
@@ -50,20 +50,20 @@ export const reducer = (state, { type, payload }) => {
   }
 };
 
-export const getHandler = (actions) => {
+export const getHandler = (actions, viewportWidth) => {
   if (!actions) return console.error("No actions available");
 
   const handler = {
     mousedown(event) {
-      const { x, y } = actions.getRelativeCoordinates(event);
+      const { x, y } = actions.getRelativeCoordinates(event, viewportWidth);
       actions.beginDrawingLine(x, y);
     },
     mousemove(event) {
-      const { x, y } = actions.getRelativeCoordinates(event);
+      const { x, y } = actions.getRelativeCoordinates(event, viewportWidth);
       actions.showStickyDrawingLine(x, y);
     },
     mouseup(event) {
-      const { x, y } = actions.getRelativeCoordinates(event);
+      const { x, y } = actions.getRelativeCoordinates(event, viewportWidth);
       actions.endDrawingLine(x, y);
     },
   };

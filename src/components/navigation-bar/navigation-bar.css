@@ -38,6 +38,7 @@
   font-weight: 700;
   cursor: pointer;
   user-select: none;
+  max-width: 10rem;
 }
 
 @media screen and (max-width: 825px) {

@@ -176,8 +176,6 @@ export default class CanvasActions {
     if (!this.isDrawing) return;
     this.currentActions = [];
 
-    console.log("Here", this.props.walletId.current);
-
     if (this.shapeContainer.isShape) {
       if (!this.props.walletId.current) {
         this.stage.removeChild(this.shapeContainer.shape);

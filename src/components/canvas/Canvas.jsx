@@ -11,7 +11,6 @@ import React, {
   useReducer,
   useContext,
 } from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import TimeLocked from "../time-locked-canvas/TimeLocked";
 import LoginLocked from "../login-locked-canvas/LoginLocked";
@@ -24,11 +23,6 @@ import CanvasActions from "./canvasActions";
 import "./canvas.css";
 import AuthContext from "../../context/Auth";
 
-const meta = {
-  walletAddress: "0x686800b7e090271c922450C47Ad30C2702C7bfE9",
-  createdAt: new Date().toJSON(),
-};
-
 export default function CanvasWithReducer(props) {
   const [state, dispatch] = useReducer(reducer, initState);
   return <Canvas {...props} state={state} dispatch={dispatch} />;
@@ -39,11 +33,25 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
   const actions = useRef();
   const [auth] = useContext(AuthContext);
   const walletId = useRef();
-  const [isPanningDisabled, setPanningDisable] = useState(true);
+  const [viewportWidth, setViewportWidth] = useState(
+    Math.min(document.documentElement.clientWidth, 540)
+  );
 
-  const toggleFABCallback = () => {
-    if (isPanningDisabled) setPanningDisable(false);
-    else setPanningDisable(true);
+  const getScaledContributors = () => {
+    const scaleFactor = viewportWidth / 540;
+    const scaledContributors = contributors.map(({ drawing, ...props }) => {
+      return {
+        ...props,
+        drawing: {
+          type: drawing.type,
+          startX: drawing.startX * scaleFactor,
+          startY: drawing.startX * scaleFactor,
+          endX: drawing.endX * scaleFactor,
+          endY: drawing.endY * scaleFactor,
+        },
+      };
+    });
+    return scaledContributors;
   };
 
   useEffect(() => {
@@ -51,14 +59,28 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
   }, [auth, auth.walletId]);
 
   useEffect(() => {
+    const resizeHandler = () => {
+      setViewportWidth(Math.min(document.documentElement.clientWidth, 540));
+      dispatch({ type: "popup-tip", payload: {} });
+      if (actions.current) actions.current.stage.update();
+    };
+
+    resizeHandler();
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    const scaledContributors = getScaledContributors();
 
     actions.current = new CanvasActions(
       canvas,
       {
         colors: { accent: "red", regular: "black" },
-        initData: contributors,
+        initData: scaledContributors,
         walletId,
       },
       {
@@ -104,73 +126,27 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
       canvas.removeEventListener("touchend", handler.touchend, false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contributors, state.renderKey]);
-
-  useEffect(() => {
-    const resizeHandler = () => {
-      const viewportWidth = document.documentElement.clientWidth;
-      dispatch({ type: "popup-tip", payload: {} });
-      if (actions.current) actions.current.stage.update();
-      if (viewportWidth <= 540) {
-        dispatch({ type: "set-is-mobile", payload: true });
-        setPanningDisable(false);
-      } else {
-        dispatch({ type: "set-is-mobile", payload: false });
-        setPanningDisable(true);
-      }
-    };
-
-    resizeHandler();
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
-  }, []);
+  }, [contributors, state.renderKey, viewportWidth]);
 
   return (
     <React.Fragment>
       <ConfirmationPrompt {...state.confirmPrompt} />
       <PopupTip {...state.popupTip} />
-      {state.isMobile && (
-        <FloatingActionButton
-          isLocked={isPanningDisabled || state.isLocked}
-          callback={toggleFABCallback}
-        />
-      )}
 
       <TimeLocked
         availableAt={state.availableAt}
         forceRender={() => dispatch({ type: "render" })}
       >
         <LoginLocked toggleConnectWallet={toggleConnectWallet}>
-          <TransformWrapper
-            pinch={{ disabled: true }}
-            doubleClick={{ disabled: true }}
-            wheel={{ disabled: true }}
-            panning={{ disabled: isPanningDisabled }}
-          >
-            <TransformComponent
-              wrapperClass={"mystery-machine"}
-              wrapperStyle={{
-                backgroundColor: canvasProps.style.backgroundColor,
-                "--after-content":
-                  isPanningDisabled && !state.isLocked ? "none" : "block",
-              }}
-            >
-              <canvas ref={canvasRef} {...canvasProps}></canvas>
-            </TransformComponent>
-          </TransformWrapper>
+          <canvas
+            className="mystery-machine"
+            ref={canvasRef}
+            {...canvasProps}
+            width={viewportWidth}
+            height={viewportWidth}
+          ></canvas>
         </LoginLocked>
       </TimeLocked>
     </React.Fragment>
-  );
-};
-
-const FloatingActionButton = ({ isLocked, callback = _.noop }) => {
-  return (
-    <div className="floating-action-button" onClick={callback}>
-      <img
-        src={`/icons/lock-${isLocked ? "on" : "off"}.svg`}
-        alt="floating-action-button"
-      />
-    </div>
   );
 };
