@@ -170,16 +170,16 @@ export default class CanvasActions {
     if (!this.isDrawing) return;
     this.currentActions = [];
     if (this.shapeContainer.isShape) {
-      console.log("Locking");
       this.props.toggleConfirm({
         callback: (val) => {
           this.isLocked = val;
+          console.log("Locking", this.isLocked);
           if (!val) {
             this.stage.removeChild(this.shapeContainer.shape);
             this.shapeContainer.shape.graphics.clear();
-            this.stage.clear();
-            this.stage.update();
           }
+          this.stage.clear();
+          this.stage.update();
           this.props.toggleConfirm({});
         },
       });

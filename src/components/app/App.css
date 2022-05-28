@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   width: min(1280px, 100%);
-  padding: 0 4rem;
   margin: auto;
 }
 
 .App-header {
   height: 8rem;
+  padding: 0 4rem;
 }
 
 .App-body {

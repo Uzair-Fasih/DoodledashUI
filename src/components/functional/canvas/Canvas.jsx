@@ -5,6 +5,7 @@
 
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import CanvasActions from "./canvasActions";
 
 import "./canvas.css";
@@ -19,11 +20,29 @@ export default function Canvas({ contributors }) {
   const actions = useRef();
   const [selectedLine, setSelectedLine] = useState({});
   const [showConfirm, toggleConfirm] = useState({});
+  const [isMobile, setMobile] = useState(false);
+  const [options, setOptions] = useState({
+    pinch: { disabled: true },
+    doubleClick: { disabled: true },
+    panning: { disabled: true },
+    wheel: { disabled: true },
+  });
 
   const canvasProps = {
     height: 540,
     width: 540,
     style: { backgroundColor: "#f8f9fa" },
+  };
+
+  const toggleFABCallback = () => {
+    const isLocked = options.panning.disabled;
+    if (isLocked) {
+      setOptions(_.merge({}, options, { panning: { disabled: false } }));
+      actions.current.stage.enableDOMEvents(false);
+    } else {
+      setOptions(_.merge({}, options, { panning: { disabled: true } }));
+      actions.current.stage.enableDOMEvents(true);
+    }
   };
 
   useEffect(() => {
@@ -61,11 +80,48 @@ export default function Canvas({ contributors }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSelectedLine, contributors]);
 
+  useEffect(() => {
+    const resizeHandler = () => {
+      console.log("Called resize handler");
+      const viewportWidth = document.documentElement.clientWidth;
+      if (viewportWidth <= 540) {
+        setMobile(true);
+        setOptions(_.merge({}, options, { panning: { disabled: false } }));
+        actions.current.stage.enableDOMEvents(false);
+      } else {
+        setMobile(false);
+        setOptions(_.merge({}, options, { panning: { disabled: true } }));
+        actions.current.stage.enableDOMEvents(true);
+      }
+    };
+
+    resizeHandler();
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+
   return (
     <React.Fragment>
       {!_.isEmpty(showConfirm) && <ConfirmationPrompt data={showConfirm} />}
       {!_.isEmpty(selectedLine) && <PopupTip data={selectedLine} />}
-      <canvas ref={canvasRef} id="mystery-machine" {...canvasProps}></canvas>
+
+      {isMobile && (
+        <FloatingActionButton
+          isLocked={options.panning.disabled}
+          callback={toggleFABCallback}
+        />
+      )}
+      <TransformWrapper {...options}>
+        <TransformComponent
+          wrapperClass={"mystery-machine"}
+          wrapperStyle={{
+            "--after-content": options.panning.disabled ? "none" : "block",
+            backgroundColor: "#f8f9fa",
+          }}
+        >
+          <canvas ref={canvasRef} {...canvasProps}></canvas>
+        </TransformComponent>
+      </TransformWrapper>
     </React.Fragment>
   );
 }
@@ -140,6 +196,17 @@ const ConfirmationPrompt = ({ data }) => {
           Cancel
         </button>
       </div>
+    </div>
+  );
+};
+
+const FloatingActionButton = ({ isLocked, callback = _.noop }) => {
+  return (
+    <div className="floating-action-button" onClick={callback}>
+      <img
+        src={`/icons/lock-${isLocked ? "on" : "off"}.svg`}
+        alt="floating-action-button"
+      />
     </div>
   );
 };
