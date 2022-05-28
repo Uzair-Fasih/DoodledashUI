@@ -8,6 +8,7 @@ export default class CanvasActions {
 
     this.stage.autoClear = false;
     this.stage.enableDOMEvents(true);
+    this.stage.enableMouseOver();
 
     this.ctx = canvas.getContext("2d");
     this.props = props;
@@ -58,6 +59,7 @@ export default class CanvasActions {
     } = { drawing: {} }
   ) {
     const shape = new createjs.Shape();
+    shape.cursor = "pointer";
     const shapeContainer = {
       meta,
       shape,
