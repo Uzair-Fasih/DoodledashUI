@@ -1,6 +1,9 @@
+import React, { useContext } from "react";
+import AuthContext from "../../context/Auth";
 import "./navigation-bar.css";
 
-export default function NavigationBar() {
+export default function NavigationBar({ toggleConnectWallet }) {
+  const [auth] = useContext(AuthContext);
   const routes = [
     {
       name: "Draw",
@@ -30,7 +33,19 @@ export default function NavigationBar() {
           </a>
         ))}
       </div>
-      <button>Connect Wallet</button>
+      <React.Fragment>
+        {!auth.walletId && (
+          <button onClick={toggleConnectWallet}>
+            Connect Wallet{" "}
+            <img src="/icons/metamask.svg" alt="using Metamask" />
+          </button>
+        )}
+        {auth.walletId && (
+          <span className="navigation-bar-logged-in heartbeat">
+            {auth.walletId}
+          </span>
+        )}
+      </React.Fragment>
     </div>
   );
 }

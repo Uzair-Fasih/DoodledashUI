@@ -4,10 +4,17 @@
  */
 
 import _ from "lodash";
-import React, { useEffect, useRef, useState, useReducer } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useReducer,
+  useContext,
+} from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import TimeLocked from "../time-locked-canvas/TimeLocked";
+import LoginLocked from "../login-locked-canvas/LoginLocked";
 import ConfirmationPrompt from "../confirmation-prompt/ConfirmationPrompt";
 import PopupTip from "../popup-tip/PopupTip";
 
@@ -15,6 +22,7 @@ import { getHandler, reducer, initState, canvasProps } from "./canvas.helper";
 import CanvasActions from "./canvasActions";
 
 import "./canvas.css";
+import AuthContext from "../../context/Auth";
 
 const meta = {
   walletAddress: "0x686800b7e090271c922450C47Ad30C2702C7bfE9",
@@ -26,9 +34,10 @@ export default function CanvasWithReducer(props) {
   return <Canvas {...props} state={state} dispatch={dispatch} />;
 }
 
-const Canvas = ({ contributors, state, dispatch }) => {
+const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
   const canvasRef = useRef();
   const actions = useRef();
+  const [auth] = useContext(AuthContext);
   const [isPanningDisabled, setPanningDisable] = useState(true);
 
   const toggleFABCallback = () => {
@@ -44,7 +53,7 @@ const Canvas = ({ contributors, state, dispatch }) => {
       {
         colors: { accent: "red", regular: "black" },
         initData: contributors,
-        meta,
+        meta: auth,
       },
       {
         showPopupTip: (popupTip) => {
@@ -94,6 +103,7 @@ const Canvas = ({ contributors, state, dispatch }) => {
     const resizeHandler = () => {
       const viewportWidth = document.documentElement.clientWidth;
       dispatch({ type: "popup-tip", payload: {} });
+      if (actions.current) actions.current.stage.update();
       if (viewportWidth <= 540) {
         dispatch({ type: "set-is-mobile", payload: true });
         setPanningDisable(false);
@@ -123,23 +133,25 @@ const Canvas = ({ contributors, state, dispatch }) => {
         availableAt={state.availableAt}
         forceRender={() => dispatch({ type: "render" })}
       >
-        <TransformWrapper
-          pinch={{ disabled: true }}
-          doubleClick={{ disabled: true }}
-          wheel={{ disabled: true }}
-          panning={{ disabled: isPanningDisabled }}
-        >
-          <TransformComponent
-            wrapperClass={"mystery-machine"}
-            wrapperStyle={{
-              backgroundColor: canvasProps.style.backgroundColor,
-              "--after-content":
-                isPanningDisabled && !state.isLocked ? "none" : "block",
-            }}
+        <LoginLocked toggleConnectWallet={toggleConnectWallet}>
+          <TransformWrapper
+            pinch={{ disabled: true }}
+            doubleClick={{ disabled: true }}
+            wheel={{ disabled: true }}
+            panning={{ disabled: isPanningDisabled }}
           >
-            <canvas ref={canvasRef} {...canvasProps}></canvas>
-          </TransformComponent>
-        </TransformWrapper>
+            <TransformComponent
+              wrapperClass={"mystery-machine"}
+              wrapperStyle={{
+                backgroundColor: canvasProps.style.backgroundColor,
+                "--after-content":
+                  isPanningDisabled && !state.isLocked ? "none" : "block",
+              }}
+            >
+              <canvas ref={canvasRef} {...canvasProps}></canvas>
+            </TransformComponent>
+          </TransformWrapper>
+        </LoginLocked>
       </TimeLocked>
     </React.Fragment>
   );

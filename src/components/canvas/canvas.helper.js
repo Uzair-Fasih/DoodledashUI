@@ -5,14 +5,14 @@ const silenceEvent = (event) => {
   event.stopPropagation();
 };
 const d = new Date();
-d.setSeconds(d.getSeconds() + 3);
+d.setMinutes(d.getMinutes() + 20);
 export const initState = {
   popupTip: {},
   confirmPrompt: {},
   isLocked: false,
   isMobile: false,
   lockType: null,
-  availableAt: d.toJSON(),
+  availableAt: "2022-05-28T11:10:32.082Z", //d.toJSON(),
   renderKey: 0,
 };
 

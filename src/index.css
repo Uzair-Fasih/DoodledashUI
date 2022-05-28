@@ -58,13 +58,37 @@ button {
   letter-spacing: 1px;
   cursor: pointer;
   transition: .3s ease-in-out;
+  align-content: center;
+  display: flex;
+  justify-content: center;
+}
+
+button>img {
+  margin-left: .5rem;
+  height: 1.5rem;
 }
 
 button:hover {
   background-color: #3a3a3a;
 }
 
+
 button.secondary {
   color: #202020;
   background-color: #FFF;
+}
+
+
+.fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }

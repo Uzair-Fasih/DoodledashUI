@@ -129,7 +129,7 @@ export default class CanvasActions {
     this.isDrawing = true;
 
     const shapeContainer = this.getShapeContainer({
-      meta: this.props.meta,
+      meta: { ...this.props.meta, createdAt: new Date().toJSON() },
       drawing: {},
     });
     this.stage.addChild(shapeContainer.shape);

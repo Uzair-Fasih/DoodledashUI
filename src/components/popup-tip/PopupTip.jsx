@@ -1,24 +1,29 @@
-import "./popup-tip.css";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
 
-export default function PopupTip({
-  clientX,
-  clientY,
-  walletAddress,
-  createdAt,
-}) {
-  //
+import "./popup-tip.css";
+import AuthContext from "../../context/Auth";
+import { useContext } from "react";
+
+dayjs.extend(relativeTime);
+
+export default function PopupTip({ clientX, clientY, walletId, createdAt }) {
+  const [auth] = useContext(AuthContext);
+  const isMe = auth.walletId === walletId;
   return (
-    walletAddress && (
+    walletId && (
       <div
-        className="popup-tip"
+        className={`popup-tip ${isMe ? "secondary" : ""}`}
         style={{
           left: `${clientX + 20}px`,
           top: `${clientY}px`,
         }}
       >
-        <p>Added by:</p>
-        <p>{walletAddress}</p>
-        <p>{createdAt}</p>
+        <p>
+          Added by
+          <b>{` ${isMe ? "You" : walletId}, `}</b>
+        </p>
+        <p>{dayjs(createdAt).fromNow()}</p>
       </div>
     )
   );

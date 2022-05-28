@@ -33,8 +33,33 @@
   background-color: rgba(125, 125, 125, .075);
 }
 
+.navigation-bar-logged-in {
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
 @media screen and (max-width: 825px) {
   .routes {
     display: none;
+  }
+}
+
+.heartbeat {
+  animation: blink-1 0.6s both;
+}
+
+@keyframes blink-1 {
+
+  0%,
+  40%,
+  100% {
+    color: #202020;
+  }
+
+  20%,
+  80% {
+    color: #9966ff;
   }
 }
