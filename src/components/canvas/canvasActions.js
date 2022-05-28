@@ -129,7 +129,10 @@ export default class CanvasActions {
     this.isDrawing = true;
 
     const shapeContainer = this.getShapeContainer({
-      meta: { ...this.props.meta, createdAt: new Date().toJSON() },
+      meta: {
+        walletId: this.props.walletId.current,
+        createdAt: new Date().toJSON(),
+      },
       drawing: {},
     });
     this.stage.addChild(shapeContainer.shape);
@@ -170,20 +173,32 @@ export default class CanvasActions {
   endDrawingLine() {
     if (!this.isDrawing) return;
     this.currentActions = [];
+
+    console.log("Here", this.props.walletId.current);
+
     if (this.shapeContainer.isShape) {
-      this.actions.showConfirmationPrompt({
-        prompt: "Are you sure you'd like to set this line?",
-        callback: (val) => {
-          this.isLocked = val;
-          if (!val) {
-            this.stage.removeChild(this.shapeContainer.shape);
-            this.shapeContainer.shape.graphics.clear();
-          }
-          this.stage.clear();
-          this.stage.update();
-        },
-      });
+      if (!this.props.walletId.current) {
+        this.stage.removeChild(this.shapeContainer.shape);
+        this.shapeContainer.shape.graphics.clear();
+        this.actions.toggleConnectWallet();
+        this.stage.clear();
+        this.stage.update();
+      } else {
+        this.actions.showConfirmationPrompt({
+          prompt: "Are you sure you'd like to set this line?",
+          callback: (val) => {
+            this.isLocked = val;
+            if (!val) {
+              this.stage.removeChild(this.shapeContainer.shape);
+              this.shapeContainer.shape.graphics.clear();
+            }
+            this.stage.clear();
+            this.stage.update();
+          },
+        });
+      }
     }
+
     this.shape = null;
     this.g = null;
     this.isDrawing = false;

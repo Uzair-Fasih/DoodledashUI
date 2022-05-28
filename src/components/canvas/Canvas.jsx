@@ -38,6 +38,7 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
   const canvasRef = useRef();
   const actions = useRef();
   const [auth] = useContext(AuthContext);
+  const walletId = useRef();
   const [isPanningDisabled, setPanningDisable] = useState(true);
 
   const toggleFABCallback = () => {
@@ -46,16 +47,22 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
   };
 
   useEffect(() => {
+    walletId.current = auth.walletId;
+  }, [auth, auth.walletId]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     actions.current = new CanvasActions(
       canvas,
       {
         colors: { accent: "red", regular: "black" },
         initData: contributors,
-        meta: auth,
+        walletId,
       },
       {
+        toggleConnectWallet,
         showPopupTip: (popupTip) => {
           dispatch({ type: "popup-tip", payload: popupTip });
         },
