@@ -63,3 +63,8 @@ button {
 button:hover {
   background-color: #3a3a3a;
 }
+
+button.secondary {
+  color: #202020;
+  background-color: #FFF;
+}

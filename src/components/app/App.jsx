@@ -1,7 +1,7 @@
 import "./App.css";
 
 import NavigationBar from "../navigation-bar/NavigationBar";
-import Canvas from "../functional/canvas/Canvas";
+import Canvas from "../canvas/Canvas";
 import canvasData from "../../test/canvasData.json";
 
 function App() {
@@ -11,8 +11,13 @@ function App() {
         <NavigationBar />
       </header>
       <div className="App-body">
-        <p className="canvas-title">{canvasData.title}</p>
-        <Canvas contributors={canvasData.contributors} />
+        <div className="App-hero">
+          <p className="canvas-title">{canvasData.title}</p>
+          <Canvas
+            contributors={canvasData.contributors}
+            lockType="time-locked"
+          />
+        </div>
       </div>
     </div>
   );

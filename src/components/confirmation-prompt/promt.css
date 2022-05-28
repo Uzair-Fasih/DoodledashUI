@@ -1,0 +1,28 @@
+.confirmation-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  background-color: #9966ff;
+  padding: 2rem;
+  font-size: 2rem;
+  width: min(50rem, calc(100% - 4rem));
+  display: grid;
+  place-items: center;
+  border-radius: .4rem;
+  font-weight: 300;
+  box-shadow: 10px 10px 120px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3);
+}
+
+.confirmation-call-to-actions {
+  display: flex;
+  flex-direction: row;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.confirmation-call-to-actions>button {
+  margin: 1rem;
+  min-width: 10rem;
+}

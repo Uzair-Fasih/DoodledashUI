@@ -20,52 +20,6 @@
   display: var(--after-content);
 }
 
-.popup {
-  position: fixed;
-  top: 10rem;
-  left: 10rem;
-  padding: 2rem;
-  border-radius: 6px;
-  background: #ffffff;
-  z-index: 1;
-  border: 0.5px solid rgba(34, 38, 42, 0.07);
-  box-shadow: 10px 10px 120px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3);
-}
-
-.confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  background-color: #9966ff;
-  padding: 2rem;
-  font-size: 2rem;
-  width: min(50rem, calc(100% - 4rem));
-  display: grid;
-  place-items: center;
-  border-radius: .4rem;
-  font-weight: 300;
-  box-shadow: 10px 10px 120px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3);
-}
-
-.confirmation-call-to-actions {
-  display: flex;
-  flex-direction: row;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.confirmation-call-to-actions>button {
-  margin: 1rem;
-  min-width: 10rem;
-}
-
-.confirmation-call-to-actions>button.secondary {
-  color: #202020;
-  background-color: #FFF;
-}
-
 .floating-action-button {
   position: fixed;
   z-index: 3;

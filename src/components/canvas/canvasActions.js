@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 export default class CanvasActions {
-  constructor(canvas, canvasProps) {
+  constructor(canvas, props, actions) {
     this.canvas = canvas;
     this.stage = new createjs.Stage(canvas);
 
@@ -10,14 +10,14 @@ export default class CanvasActions {
     this.stage.enableDOMEvents(true);
 
     this.ctx = canvas.getContext("2d");
-    this.props = canvasProps;
-    this.togglePopup = canvasProps.setPopupStatus;
+    this.props = props;
+    this.actions = actions;
 
     this.currentActions = [];
     this.isDrawing = false;
     this.isLocked = false;
 
-    this.setupInitData(canvasProps.initData);
+    this.setupInitData(props.initData);
   }
 
   setupInitData(actions = []) {
@@ -45,7 +45,6 @@ export default class CanvasActions {
       clientY = event.clientY;
     }
 
-    // console.log({ clientX, clientY, scale }, rect);
     const x = Math.floor(clientX - rect.left);
     const y = Math.floor(clientY - rect.top);
     return { x, y };
@@ -92,9 +91,11 @@ export default class CanvasActions {
       shapeContainer.isSelected = true;
       this.stage.update();
 
-      this.togglePopup({
+      const { clientX, clientY } = event.nativeEvent;
+      this.actions.showPopupTip({
         ...shapeContainer.meta,
-        event,
+        clientX,
+        clientY,
       });
     });
 
@@ -115,7 +116,7 @@ export default class CanvasActions {
 
       shapeContainer.nextTick = false;
       shapeContainer.isSelected = false;
-      this.togglePopup({});
+      this.actions.showPopupTip({});
     });
 
     return shapeContainer;
@@ -170,17 +171,16 @@ export default class CanvasActions {
     if (!this.isDrawing) return;
     this.currentActions = [];
     if (this.shapeContainer.isShape) {
-      this.props.toggleConfirm({
+      this.actions.showConfirmationPrompt({
+        prompt: "Are you sure you'd like to set this line?",
         callback: (val) => {
           this.isLocked = val;
-          console.log("Locking", this.isLocked);
           if (!val) {
             this.stage.removeChild(this.shapeContainer.shape);
             this.shapeContainer.shape.graphics.clear();
           }
           this.stage.clear();
           this.stage.update();
-          this.props.toggleConfirm({});
         },
       });
     }
