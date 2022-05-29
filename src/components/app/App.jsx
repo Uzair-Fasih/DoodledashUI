@@ -8,6 +8,7 @@ import AuthContext from "../../context/Auth";
 
 import canvasData from "../../test/canvasData.json";
 import { useState, useContext, useEffect } from "react";
+import _ from "lodash";
 
 function App() {
   const [, setAuth] = useContext(AuthContext);
@@ -19,7 +20,12 @@ function App() {
 
   useEffect(() => {
     const connectWallet = async () => {
-      const accounts = await window.ethereum.request({
+      const ethereum = _.get(window, "ethereum");
+      if (!ethereum) {
+        setLoading(false);
+        return;
+      }
+      const accounts = await ethereum.request({
         method: "eth_accounts",
       });
       if (accounts && accounts[0] > 0) {

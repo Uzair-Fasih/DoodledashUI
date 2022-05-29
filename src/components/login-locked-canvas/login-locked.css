@@ -11,6 +11,7 @@ button.login-locked-button {
   margin: auto;
   background-color: rgba(255, 255, 255, 0.016);
   color: #202020;
+  width: max-content;
   box-shadow: 10px 10px 120px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3);
 }
 
