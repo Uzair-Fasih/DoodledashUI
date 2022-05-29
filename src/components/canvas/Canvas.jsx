@@ -3,7 +3,6 @@
  * The canvas should be workable on any screen size. The size of the canvas is the standard size for NFTs
  */
 
-import _ from "lodash";
 import React, {
   useEffect,
   useRef,
@@ -68,7 +67,7 @@ const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
     resizeHandler();
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

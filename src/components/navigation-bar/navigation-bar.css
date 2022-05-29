@@ -38,12 +38,17 @@
   font-weight: 700;
   cursor: pointer;
   user-select: none;
-  max-width: 10rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 @media screen and (max-width: 825px) {
   .routes {
     display: none;
+  }
+
+  .navigation-bar-logged-in {
+    width: 20rem;
   }
 }
 

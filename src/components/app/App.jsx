@@ -10,24 +10,25 @@ import canvasData from "../../test/canvasData.json";
 import { useState, useContext, useEffect } from "react";
 
 function App() {
-  const [auth, setAuth] = useContext(AuthContext);
+  const [, setAuth] = useContext(AuthContext);
   const [isLoading, setLoading] = useState(true);
   const [showConnectWallet, setConnectWallet] = useState(false);
   const toggleConnectWallet = () => {
     setConnectWallet(!showConnectWallet);
   };
 
-  const connectWallet = async () => {
-    const accounts = await window.ethereum.request({ method: "eth_accounts" });
-    if (accounts && accounts[0] > 0) {
-      setAuth((state) => ({ ...state, walletId: accounts[0] }));
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const connectWallet = async () => {
+      const accounts = await window.ethereum.request({
+        method: "eth_accounts",
+      });
+      if (accounts && accounts[0] > 0) {
+        setAuth((state) => ({ ...state, walletId: accounts[0] }));
+      }
+      setLoading(false);
+    };
     connectWallet();
-  }, []);
+  }, [setAuth]);
 
   if (isLoading) return null;
   return (
