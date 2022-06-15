@@ -1,6 +1,7 @@
 .login-locked {
   position: relative;
-  width: min(540px, 100%);
+  width: min(480px, 100%);
+  height: min(480px, 100vw);
 }
 
 button.login-locked-button {
@@ -9,14 +10,14 @@ button.login-locked-button {
   left: 0;
   right: 0;
   margin: auto;
-  background-color: rgba(255, 255, 255, 0.016);
-  color: #202020;
+  background-color: #fab000;
+  color: #fff;
+  font-weight: 800;
   width: max-content;
   box-shadow: 10px 10px 120px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3);
 }
 
 button.login-locked-button:hover {
-  font-weight: 600;
-  background-color: #9966ff;
+  background-color: #ff7600;
   color: #fff;
 }

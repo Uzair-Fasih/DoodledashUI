@@ -4,10 +4,38 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  align-items: center;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: row;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 1rem;
+}
+
+.user-meta h1,
+p {
+  line-height: 1.8rem;
+  font-size: 1.4rem;
+}
+
+.avatar {
+  height: 5rem;
+  width: 5rem;
+  border-radius: 100%;
+  overflow: hidden;
+  border: .5rem solid #FFF;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 20px 0px;
 }
 
 .logo {
-  width: 6rem;
+  height: 7rem;
 }
 
 .routes {

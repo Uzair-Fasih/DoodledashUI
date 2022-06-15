@@ -1,31 +1,47 @@
 import React, { useContext } from "react";
 import AuthContext from "../../context/Auth";
+import Avatar from "./generateAvatar";
 import "./navigation-bar.css";
 
-export default function NavigationBar({ toggleConnectWallet }) {
+import { connectWallet } from "../../utilities/login/connect";
+
+const UserDetail = ({ walletId }) => {
+  return (
+    <div className="user-detail">
+      <div className="avatar">
+        <Avatar walletId={walletId} />
+      </div>
+      <div className="user-meta">
+        <h1>Unnamed</h1>
+        <p>
+          {walletId.slice(0, 6) + "..." + walletId.slice(walletId.length - 4)}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default function NavigationBar() {
   const [auth] = useContext(AuthContext);
   const routes = [
-    {
-      name: "Draw",
-      url: "/draw",
-    },
-    {
-      name: "Collection",
-      url: "/collection",
-    },
-    {
-      name: "How it works",
-      url: "/how-it-works",
-    },
+    // {
+    //   name: "Draw",
+    //   url: "/draw",
+    // },
+    // {
+    //   name: "Collection",
+    //   url: "/collection",
+    // },
+    // {
+    //   name: "How it works",
+    //   url: "/how-it-works",
+    // },
   ];
 
   return (
     <div className="navigation-bar">
-      <img
-        className="logo"
-        src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg"
-        alt="Doodledash"
-      />
+      <img className="logo" src="/images/logo.png" alt="Doodledash" />
+
       <div className="routes">
         {routes.map((route) => (
           <a href={route.url} key={route.url}>
@@ -33,18 +49,13 @@ export default function NavigationBar({ toggleConnectWallet }) {
           </a>
         ))}
       </div>
+
       <React.Fragment>
         {!auth.walletId && (
-          <button onClick={toggleConnectWallet}>
-            Connect Wallet{" "}
-            <img src="/icons/metamask.svg" alt="using Metamask" />
-          </button>
+          <button onClick={connectWallet}>Connect Wallet</button>
         )}
-        {auth.walletId && (
-          <span className="navigation-bar-logged-in heartbeat">
-            {auth.walletId}
-          </span>
-        )}
+
+        {auth.walletId && <UserDetail walletId={auth.walletId} />}
       </React.Fragment>
     </div>
   );

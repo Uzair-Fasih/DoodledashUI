@@ -1,59 +1,43 @@
 import "./App.css";
 
+import { useState, useEffect, useContext } from "react";
 import NavigationBar from "../navigation-bar/NavigationBar";
 import Canvas from "../canvas/Canvas";
-import ConnectWallet from "../connect-wallet/ConnectWallet";
+import Alert from "../alert/Alert";
+
+import { loadWallet } from "../../utilities/login/connect";
 
 import AuthContext from "../../context/Auth";
 
-import canvasData from "../../test/canvasData.json";
-import { useState, useContext, useEffect } from "react";
-import _ from "lodash";
-
 function App() {
-  const [, setAuth] = useContext(AuthContext);
+  // eslint-disable-next-line no-unused-vars
+  const [auth, setAuth] = useContext(AuthContext);
   const [isLoading, setLoading] = useState(true);
-  const [showConnectWallet, setConnectWallet] = useState(false);
-  const toggleConnectWallet = () => {
-    setConnectWallet(!showConnectWallet);
-  };
 
   useEffect(() => {
-    const connectWallet = async () => {
-      const ethereum = _.get(window, "ethereum");
-      if (!ethereum) {
-        setLoading(false);
-        return;
-      }
-      const accounts = await ethereum.request({
-        method: "eth_accounts",
-      });
-      if (accounts && accounts[0] > 0) {
-        setAuth((state) => ({ ...state, walletId: accounts[0] }));
-      }
-      setLoading(false);
-    };
-    connectWallet();
+    loadWallet(setLoading, setAuth);
   }, [setAuth]);
 
   if (isLoading) return null;
   return (
     <div className="App fade-in">
-      {showConnectWallet && (
-        <ConnectWallet toggleConnectWallet={toggleConnectWallet} />
-      )}
       <header className="App-header">
-        <NavigationBar toggleConnectWallet={toggleConnectWallet} />
+        <NavigationBar />
       </header>
-      <div className="App-body">
+      <main className="App-body">
+        <Alert />
         <div className="App-hero">
-          <p className="canvas-title">{canvasData.title}</p>
-          <Canvas
-            contributors={canvasData.contributors}
-            toggleConnectWallet={toggleConnectWallet}
-          />
+          <Canvas />
         </div>
-      </div>
+
+        <div className="guide-lines">
+          <div className="guide-lines--line"></div>
+          <div className="guide-lines--line"></div>
+          <div className="guide-lines--line"></div>
+          <div className="guide-lines--line"></div>
+          <div className="guide-lines--line"></div>
+        </div>
+      </main>
     </div>
   );
 }

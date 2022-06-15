@@ -31,7 +31,7 @@ export default function TimeLocked({
   children,
 }) {
   const [showContent, setShowContent] = useState(
-    new Date() > new Date(availableAt)
+    _.isNil(availableAt) ? true : new Date() > new Date(availableAt)
   );
   const [countdown, setCounter] = useState(getTimerContent(availableAt));
 

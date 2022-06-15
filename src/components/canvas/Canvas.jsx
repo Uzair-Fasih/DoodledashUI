@@ -3,149 +3,120 @@
  * The canvas should be workable on any screen size. The size of the canvas is the standard size for NFTs
  */
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useReducer,
-  useContext,
-} from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 
-import TimeLocked from "../time-locked-canvas/TimeLocked";
-import LoginLocked from "../login-locked-canvas/LoginLocked";
-import ConfirmationPrompt from "../confirmation-prompt/ConfirmationPrompt";
-import PopupTip from "../popup-tip/PopupTip";
+import TimeLocked from "./locks/time";
+import LoginLocked from "./locks/login";
 
-import { getHandler, reducer, initState, canvasProps } from "./canvas.helper";
-import CanvasActions from "./canvasActions";
+import config from "./config.json";
+import CanvasManager from "./canvas.manager";
 
-import "./canvas.css";
 import AuthContext from "../../context/Auth";
 
-export default function CanvasWithReducer(props) {
-  const [state, dispatch] = useReducer(reducer, initState);
-  return <Canvas {...props} state={state} dispatch={dispatch} />;
-}
+import "./canvas.css";
+// import Instruction from "../instruction";
+import baseApi from "../../utilities/axios";
+import _ from "lodash";
 
-const Canvas = ({ contributors, state, dispatch, toggleConnectWallet }) => {
-  const canvasRef = useRef();
-  const actions = useRef();
+const Canvas = ({ data }) => {
   const [auth] = useContext(AuthContext);
-  const walletId = useRef();
-  const [viewportWidth, setViewportWidth] = useState(
-    Math.min(document.documentElement.clientWidth, 540)
+  const canvasRef = useRef();
+  const canvasManager = useRef();
+
+  const [canvasSideLength, setCanvasSideLength] = useState(
+    Math.min(document.documentElement.clientWidth - 20, config.length)
   );
 
-  const getScaledContributors = () => {
-    const scaleFactor = viewportWidth / 540;
-    const scaledContributors = contributors.map(({ drawing, ...props }) => {
-      return {
-        ...props,
-        drawing: {
-          type: drawing.type,
-          startX: drawing.startX * scaleFactor,
-          startY: drawing.startX * scaleFactor,
-          endX: drawing.endX * scaleFactor,
-          endY: drawing.endY * scaleFactor,
-        },
-      };
+  const resizeHandler = () => {
+    if (!canvasManager.current) return;
+    const sideLength = Math.min(
+      document.documentElement.clientWidth - 20,
+      config.length
+    );
+    setCanvasSideLength(sideLength);
+
+    // Hack to force the func execution into envent loop
+    // process at the end of the execution
+    setTimeout(() => {
+      canvasManager.current.setupCanvas();
     });
-    return scaledContributors;
   };
 
-  useEffect(() => {
-    walletId.current = auth.walletId;
-  }, [auth, auth.walletId]);
-
-  useEffect(() => {
-    const resizeHandler = () => {
-      setViewportWidth(Math.min(document.documentElement.clientWidth, 540));
-      dispatch({ type: "popup-tip", payload: {} });
-      if (actions.current) actions.current.stage.update();
-    };
-
-    resizeHandler();
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
-  }, [dispatch]);
-
+  // Initial setup of the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const scaledContributors = getScaledContributors();
+    if (!canvasManager.current)
+      canvasManager.current = new CanvasManager(
+        canvasRef.current,
+        data.lineList
+      );
 
-    actions.current = new CanvasActions(
-      canvas,
-      {
-        colors: { accent: "red", regular: "black" },
-        initData: scaledContributors,
-        walletId,
-      },
-      {
-        toggleConnectWallet,
-        showPopupTip: (popupTip) => {
-          dispatch({ type: "popup-tip", payload: popupTip });
-        },
-        showConfirmationPrompt: (confirmPrompt) => {
-          dispatch({ type: "set-canvas-lock", payload: true });
-          dispatch({
-            type: "confirmation-prompt",
-            payload: {
-              prompt: confirmPrompt.prompt,
-              callback: (...props) => {
-                confirmPrompt.callback(...props);
-                dispatch({ type: "set-canvas-lock", payload: false });
-              },
-            },
-          });
-        },
-      }
-    );
-
-    const handler = getHandler(actions.current);
-
-    canvas.addEventListener("mousedown", handler.mousedown, false);
-    canvas.addEventListener("touchstart", handler.touchstart, false);
-
-    canvas.addEventListener("mousemove", handler.mousemove, false);
-    canvas.addEventListener("touchmove", handler.touchmove, false);
-
-    canvas.addEventListener("mouseup", handler.mouseup, false);
-    canvas.addEventListener("touchend", handler.touchend, false);
-
-    return () => {
-      canvas.removeEventListener("mousedown", handler.mousedown, false);
-      canvas.removeEventListener("touchstart", handler.touchstart, false);
-
-      canvas.removeEventListener("mousemove", handler.mousemove, false);
-      canvas.removeEventListener("touchmove", handler.touchmove, false);
-
-      canvas.removeEventListener("mouseup", handler.mouseup, false);
-      canvas.removeEventListener("touchend", handler.touchend, false);
-    };
+    // Handle resize
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contributors, state.renderKey, viewportWidth]);
+  }, []);
+
+  useEffect(() => {
+    if (!canvasManager.current) return;
+    if (!!auth.walletId) canvasManager.current.enable();
+    else canvasManager.current.disable();
+  }, [auth.walletId]);
 
   return (
-    <React.Fragment>
-      <ConfirmationPrompt {...state.confirmPrompt} />
-      <PopupTip {...state.popupTip} />
-
-      <TimeLocked
-        availableAt={state.availableAt}
-        forceRender={() => dispatch({ type: "render" })}
-      >
-        <LoginLocked toggleConnectWallet={toggleConnectWallet}>
-          <canvas
-            className="mystery-machine"
-            ref={canvasRef}
-            {...canvasProps}
-            width={viewportWidth}
-            height={viewportWidth}
-          ></canvas>
-        </LoginLocked>
-      </TimeLocked>
-    </React.Fragment>
+    <canvas
+      className="mystery-machine"
+      width={canvasSideLength}
+      height={canvasSideLength}
+      ref={canvasRef}
+    ></canvas>
   );
 };
+
+const CanvasWidget = () => {
+  const [data, setData] = useState({ data: {}, isLoaded: false });
+  // const instruction = {
+  //   title: "Take part in art",
+  //   message: "Draw a line on the canvas to leave your mark on the doodle.",
+  // };
+
+  useEffect(() => {
+    if (data.isLoaded) return;
+
+    const getData = async () => {
+      try {
+        const response = await baseApi.get("/art/active");
+        setData((state) => ({
+          ...state,
+          data: _.get(response, "data.data", {}),
+          isLoaded: true,
+        }));
+      } catch (err) {
+        setData((state) => ({ ...state, isLoaded: true }));
+      }
+    };
+
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!data.isLoaded) return;
+
+  return (
+    <TimeLocked>
+      <LoginLocked>
+        <div className="canvas-container">
+          <Canvas data={data.data} />
+        </div>
+      </LoginLocked>
+    </TimeLocked>
+  );
+};
+
+// <div className="instruction-container">
+//   <Instruction {...instruction} />
+// </div>;
+
+export default CanvasWidget;
