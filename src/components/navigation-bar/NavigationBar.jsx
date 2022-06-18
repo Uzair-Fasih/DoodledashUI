@@ -24,22 +24,22 @@ const UserDetail = ({ walletId }) => {
 export default function NavigationBar() {
   const [auth] = useContext(AuthContext);
   const routes = [
-    // {
-    //   name: "Draw",
-    //   url: "/draw",
-    // },
+    {
+      name: "Draw",
+      url: "#draw",
+    },
     // {
     //   name: "Collection",
     //   url: "/collection",
     // },
-    // {
-    //   name: "How it works",
-    //   url: "/how-it-works",
-    // },
+    {
+      name: "How it works",
+      url: "#how-it-works",
+    },
   ];
 
   return (
-    <div className="navigation-bar">
+    <div className="content-container navigation-bar">
       <img className="logo" src="/images/logo.png" alt="Doodledash" />
 
       <div className="routes">

@@ -7,10 +7,19 @@
   box-shadow: 0 50px 100px -20px rgba(50, 50, 93, .25),
     0 30px 60px -30px rgba(0, 0, 0, .3),
     inset 0 -2px 6px 0 rgba(10, 37, 64, .35);
-  border-radius: 1rem;
+  border-radius: .5rem;
   background-color: #FFF;
   /* border: 0.5px solid rgba(34, 38, 42, 0.07); */
   /* 0 50px 100px -20px rgba(50, 50, 93, .25), 0 30px 60px -30px rgba(0, 0, 0, .3), inset 0 -2px 6px 0 rgba(10, 37, 64, .35); */
+}
+
+.completed {
+  width: calc(min(500px, 100vw) + 200px);
+  height: 100vh;
+  background-image: url('/public/images/confetti.svg');
+  position: fixed;
+  z-index: -1;
+  top: 0;
 }
 
 .canvas-container {

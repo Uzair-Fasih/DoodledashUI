@@ -1,7 +1,7 @@
 .login-locked {
   position: relative;
-  width: min(480px, 100%);
-  height: min(480px, 100vw);
+  width: min(500px, calc(100vw - 20px));
+  height: min(500px, calc(100vw - 20px));
 }
 
 button.login-locked-button {

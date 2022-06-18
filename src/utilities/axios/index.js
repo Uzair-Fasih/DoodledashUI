@@ -7,5 +7,8 @@ const config = {
 const baseApi = axios.create({
   baseURL: config.baseUrl,
 });
+baseApi.interceptors.response.use(function ({ data }) {
+  return data;
+});
 
 export default baseApi;

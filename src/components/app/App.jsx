@@ -1,22 +1,56 @@
-import "./App.css";
+import "./app.css";
 
+import _ from "lodash";
 import { useState, useEffect, useContext } from "react";
 import NavigationBar from "../navigation-bar/NavigationBar";
 import Canvas from "../canvas/Canvas";
 import Alert from "../alert/Alert";
+import Table from "../table/Table";
+import FAQ from "../faq/FAQ";
 
 import { loadWallet } from "../../utilities/login/connect";
+import baseApi from "../../utilities/axios";
+import socket from "../../utilities/socket";
 
 import AuthContext from "../../context/Auth";
 
 function App() {
   // eslint-disable-next-line no-unused-vars
   const [auth, setAuth] = useContext(AuthContext);
+  const [canvasData, setCanvasData] = useState({ data: {}, isLoaded: false });
   const [isLoading, setLoading] = useState(true);
-
   useEffect(() => {
     loadWallet(setLoading, setAuth);
   }, [setAuth]);
+
+  useEffect(() => {
+    if (canvasData.isLoaded) return;
+
+    baseApi
+      .get("/art/active")
+      .then((response) => {
+        // Initial data
+        setCanvasData({
+          data: _.get(response, "data", {}),
+          isLoaded: true,
+        });
+
+        // Subsequent updates
+        socket.on("message", ({ event, data }) => {
+          if (!data) return;
+          setCanvasData({
+            data,
+            isLoaded: true,
+          });
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setCanvasData((state) => ({ ...state, isLoaded: true }));
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading) return null;
   return (
@@ -26,9 +60,11 @@ function App() {
       </header>
       <main className="App-body">
         <Alert />
-        <div className="App-hero">
-          <Canvas />
+        <div id="draw" className="App-hero">
+          <Canvas canvasData={canvasData} />
         </div>
+        <Table canvasData={canvasData} />
+        <FAQ />
 
         <div className="guide-lines">
           <div className="guide-lines--line"></div>

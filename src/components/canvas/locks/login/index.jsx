@@ -16,9 +16,6 @@ export default function LoginLocked({ children }) {
         title: "You aren't logged in",
         message: "You need to login to take part in this doodle✨",
         acceptButtonText: "Aww, okay 😦🙁",
-        onAccept: () => {
-          console.log("Should open the login popup");
-        },
       });
     }
   };

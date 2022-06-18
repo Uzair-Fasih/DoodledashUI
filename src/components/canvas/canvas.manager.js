@@ -1,13 +1,18 @@
 /* global createjs */
 import _ from "lodash";
 import alertEvent from "../alert/alertEvent";
+import tooltipEvent from "../tool-tip/tooltipEvent";
 import config from "./config.json";
 
 export default class CanvasManager {
   // Setup methods
-  constructor(canvas, data = []) {
+  constructor(canvas, data = {}) {
     this.canvas = canvas;
-    this.data = data;
+    this.data = _.get(data, "lineList", []);
+    this.meta = _.get(data, "meta", {});
+    this.postLine = _.get(data, "actions.postLine", Promise.resolve);
+
+    if (_.isEmpty(this.meta)) throw new Error("User is not authenticated.");
 
     this.stage = getStage(canvas);
     this.setupCanvas();
@@ -24,8 +29,19 @@ export default class CanvasManager {
 
     // Add all the existing data
     this.data.forEach((line) => {
-      const { x1, y1, x2, y2 } = line;
-      const shape = getShape(this.canvas, x1, y1, x2, y2);
+      const { x1, y1, x2, y2, addressInfo, createdAt } = line;
+      const shape = getShape(
+        this.canvas,
+        x1,
+        y1,
+        x2,
+        y2,
+        {
+          walletId: addressInfo.address,
+          createdAt,
+        },
+        this.stage
+      );
       this.stage.addChild(shape);
     });
 
@@ -33,42 +49,65 @@ export default class CanvasManager {
   }
 
   // Interaction methods
-  actionStart(event) {
+  async actionStart(event) {
     if (this.shape !== null) return;
-    const { x, y } = getCoordinates(this.canvas, event);
+    const { stageX: x, stageY: y } = event;
 
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.shape = getShape(this.canvas, x, y, undefined, undefined, false);
-
+    this.shape = getShape(
+      this.canvas,
+      x,
+      y,
+      undefined,
+      undefined,
+      { ...this.meta, createdAt: new Date().toJSON() },
+      this.stage,
+      false
+    );
     this.stage.addChild(this.shape);
     this.stage.update();
   }
 
-  actionPreview(event) {
+  async actionPreview(event) {
     if (this.shape == null) return;
-    const { x, y } = getCoordinates(this.canvas, event);
+    const { stageX: x, stageY: y } = event;
 
-    event.preventDefault();
-    event.stopPropagation();
     this.stage.clear();
-
     this.shape.__endAt(x, y);
     this.stage.update();
   }
 
   async actionEnd(event) {
     if (this.shape == null) return;
-    const { x, y } = getCoordinates(this.canvas, event);
 
-    event.preventDefault();
-    event.stopPropagation();
+    const shape = this.shape;
+    const reject = () => {
+      shape.graphics.clear();
+      this.stage.removeChild(shape);
+      this.stage.clear();
+      this.stage.update();
+      this.shape = null;
+    };
+
+    const { stageX: x, stageY: y } = event;
+
+    const length = Math.sqrt(
+      Math.pow(shape.__x2 - shape.__x1, 2) +
+        Math.pow(shape.__y2 - shape.__y1, 2)
+    );
+    if (!length || length < 2) {
+      reject();
+      return false;
+    }
+
+    if (!this.isAllowed) {
+      reject();
+      this.showTouchNotAllowed();
+      return false;
+    }
+
     this.stage.clear();
-
     this.shape.__endAt(x, y);
     this.stage.update();
-    const shape = this.shape;
     this.shape = null;
 
     await alertEvent({
@@ -76,45 +115,124 @@ export default class CanvasManager {
       title: "Would you like to confirm?",
       message: "This change is irreversible you know 🎃",
       acceptButtonText: "I am sure",
-      onAccept: () => {
-        this.data.push({
+      onAccept: async () => {
+        const updateData = {
           x1: shape.__x1,
           y1: shape.__y1,
           x2: shape.__x2,
           y2: shape.__y2,
+          addressInfo: { address: shape.__meta.walletId },
+        };
+
+        this.data.push({
+          ...updateData,
+          createdAt: shape.__meta.createdAt,
         });
+
+        this.postLine(updateData)
+          .then(async (response) => {
+            if (!response.status) throw new Error("Something went wrong");
+            await alertEvent({
+              type: "primary",
+              title: "Congratulations 🎉",
+              message: "Thank you for your contribution to art",
+              acceptButtonText: "Love to see it",
+            });
+            this.isAllowed = false;
+          })
+          .catch((err) => {
+            console.error(err);
+            reject();
+          });
       },
       rejectButtonText: "Lemme rethink",
       onReject: () => {
-        this.stage.removeChild(shape);
-        this.stage.clear();
-        this.stage.update();
+        reject();
       },
     });
+
+    delete this.shape;
+    this.shape = null;
   }
 
   // Enable / disable
 
   enable() {
-    const cm = this;
     this.stage.enableDOMEvents(true);
-    this.canvas.addEventListener("mousedown", cm.actionStart.bind(cm));
-    this.canvas.addEventListener("touchstart", cm.actionStart.bind(cm));
-    this.canvas.addEventListener("mousemove", cm.actionPreview.bind(cm));
-    this.canvas.addEventListener("touchmove", cm.actionPreview.bind(cm));
-    this.canvas.addEventListener("mouseup", cm.actionEnd.bind(cm));
-    this.canvas.addEventListener("touchend", cm.actionEnd.bind(cm));
+
+    // Common actions to fix bad actions
+    const actionStart = this.actionStart.bind(this);
+    const actionPreview = this.actionPreview.bind(this);
+    const actionEnd = this.actionEnd.bind(this);
+    const stage = this.stage;
+
+    // Desktop events
+    stage.addEventListener("stagemousedown", actionStart);
+    stage.addEventListener("stagemousemove", actionPreview);
+    stage.addEventListener("stagemouseup", actionEnd);
+
+    // Mouse events
+    stage.addEventListener("stagetouchstart", actionStart);
+    stage.addEventListener("stagetouchmove", actionPreview);
+    stage.addEventListener("stagetouchend", actionEnd);
   }
 
-  disable() {
-    const cm = this;
-    this.stage.enableDOMEvents(false);
-    this.canvas.removeEventListener("mousedown", cm.actionStart.bind(cm));
-    this.canvas.removeEventListener("touchstart", cm.actionStart.bind(cm));
-    this.canvas.removeEventListener("mousemove", cm.actionPreview.bind(cm));
-    this.canvas.removeEventListener("touchmove", cm.actionPreview.bind(cm));
-    this.canvas.removeEventListener("mouseup", cm.actionEnd.bind(cm));
-    this.canvas.removeEventListener("touchend", cm.actionEnd.bind(cm));
+  async showTouchNotAllowed(isCompleted) {
+    if (isCompleted) {
+      await alertEvent({
+        type: "primary",
+        title: "This doodle has ended",
+        message: "Follow our social for a headsup on when we go live next 😃",
+        acceptButtonText: "Okie dokie",
+      });
+    } else {
+      await alertEvent({
+        type: "primary",
+        title: "You are already a part of this doodle",
+        message: "Keep an eye out for when the doodle goes live 😃",
+        acceptButtonText: "Okie dokie",
+      });
+    }
+    // this.canvas.addEventListener("click", handler);
+  }
+
+  // Updates
+  async update(lines, walletId) {
+    createjs.Ticker.on("tick", this.stage);
+    lines.forEach((lineData) => {
+      const { x1, y1, x2, y2, addressInfo, createdAt } = lineData;
+      if (addressInfo.address === walletId) return;
+      // because I'm lazy:
+      createjs.Ticker.on("tick", this.stage);
+
+      const shape = getShape(
+        this.canvas,
+        x1,
+        y1,
+        undefined,
+        undefined,
+        {
+          walletId: addressInfo.address,
+          createdAt,
+        },
+        this.stage,
+        false
+      );
+      this.data.push({
+        x1,
+        y1,
+        x2,
+        y2,
+        addressInfo,
+        createdAt: shape.__meta.createdAt,
+      });
+      const line = this.stage.addChild(shape);
+      const cmd = line.graphics.lineTo(x1, y1).command;
+      createjs.Tween.get(cmd, { loop: false }).to({ x: x2, y: y2 }, 1000);
+      setTimeout(() => {
+        shape.__endAt(x2, y2);
+      }, 1000);
+    });
   }
 }
 
@@ -126,17 +244,22 @@ export default class CanvasManager {
 const getStage = (canvas) => {
   const stage = new createjs.Stage(canvas);
 
-  stage.autoClear = false;
   stage.enableMouseOver();
+  createjs.Touch.enable(stage);
 
   return stage;
 };
 
-const getShape = (canvas, x1, y1, x2, y2, shouldScale = true) => {
+const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
   const shape = new createjs.Shape();
   const scaleFactor = shouldScale ? canvas.width / config.length : 1;
-
+  shape.graphics.clear();
   shape.cursor = "pointer";
+
+  if (!_.isNil(meta)) {
+    shape.__meta = meta;
+  }
+
   if (!_.isNil(x1) && !_.isNil(y1)) {
     shape.graphics.setStrokeStyle(1, "round").beginStroke(config.color);
     shape.graphics.moveTo(x1 * scaleFactor, y1 * scaleFactor);
@@ -145,6 +268,7 @@ const getShape = (canvas, x1, y1, x2, y2, shouldScale = true) => {
   if (!_.isNil(x2) && !_.isNil(y2)) {
     shape.graphics.lineTo(x2 * scaleFactor, y2 * scaleFactor);
     shape.graphics.closePath();
+    addShapeEventListener(shape, stage);
   }
 
   const reverseScaleFactor = config.length / canvas.width;
@@ -157,9 +281,6 @@ const getShape = (canvas, x1, y1, x2, y2, shouldScale = true) => {
   shape.__endAt = (x2, y2) => {
     shape.graphics.clear();
 
-    // const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    // if (length < 2) return false;
-
     shape.graphics.beginStroke(config.color);
     shape.graphics.moveTo(x1 * scaleFactor, y1 * scaleFactor);
     shape.graphics.lineTo(x2 * scaleFactor, y2 * scaleFactor);
@@ -168,24 +289,77 @@ const getShape = (canvas, x1, y1, x2, y2, shouldScale = true) => {
     shape.__x2 = x2 * reverseScaleFactor;
     shape.__y2 = y2 * reverseScaleFactor;
 
+    addShapeEventListener(shape, stage);
     return true;
   };
 
   return shape;
 };
 
-const getCoordinates = (canvas, event) => {
-  const rect = canvas.getBoundingClientRect();
-  let clientX = event.clientX;
-  let clientY = event.clientY;
+const addShapeEventListener = (shape, stage) => {
+  shape.addEventListener("click", async (event) => {
+    const target = event.target;
 
-  if (event.type.startsWith("touch")) {
-    clientX = event.changedTouches[0].clientX;
-    clientY = event.changedTouches[0].clientY;
-  }
+    // Draw the target now with a highlight instead
+    stage.clear();
+    console.log(shape.__x1, shape.__y1, shape.__x2, shape.__y2);
 
-  return {
-    x: clientX - rect.left,
-    y: clientY - rect.top,
-  };
+    target.graphics
+      .clear()
+      .beginStroke("red")
+      .moveTo(shape.__x1, shape.__y1)
+      .lineTo(shape.__x2, shape.__y2)
+      .closePath();
+
+    stage.update();
+
+    const { clientX: x, clientY: y } = event.nativeEvent;
+    shape.__selected = true;
+
+    await tooltipEvent({
+      isClosed: false,
+      event: { x, y },
+      lines: [shape],
+    });
+  });
+
+  shape.addEventListener("tick", async (event) => {
+    if (!shape.__selected) return;
+    if (!shape.nextTick) {
+      return (shape.nextTick = true);
+    }
+
+    const target = event.target;
+    stage.clear();
+
+    target.graphics
+      .clear()
+      .beginStroke(config.color)
+      .moveTo(shape.__x1, shape.__y1)
+      .lineTo(shape.__x2, shape.__y2)
+      .closePath();
+
+    await tooltipEvent({
+      isClosed: true,
+    });
+
+    shape.nextTick = false;
+    shape.__selected = false;
+  });
 };
+
+// const getCoordinates = (canvas, event) => {
+//   const rect = canvas.getBoundingClientRect();
+//   let clientX = event.clientX;
+//   let clientY = event.clientY;
+
+//   if (event.type.startsWith("touch")) {
+//     clientX = event.changedTouches[0].clientX;
+//     clientY = event.changedTouches[0].clientY;
+//   }
+
+//   return {
+//     x: clientX - rect.left,
+//     y: clientY - rect.top,
+//   };
+// };

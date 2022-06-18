@@ -46,7 +46,7 @@ const ConnectWallet = ({ onAccept = _.noop }) => {
   };
 
   const resolve = (walletId) => {
-    setAuth({ walletId });
+    setAuth({ walletId: _.toLower(walletId) });
     setLoading(false);
     onAccept();
   };
@@ -69,17 +69,24 @@ const ConnectWallet = ({ onAccept = _.noop }) => {
 };
 
 export const loadWallet = async (setLoading, setAuth) => {
+  // setAuth((state) => ({ ...state, walletId: _.toLower(Date.now()) }));
+  // setLoading(false);
+  // return;
+
   const ethereum = _.get(window, "ethereum");
   if (!ethereum) {
     setLoading(false);
     return;
   }
+
   const accounts = await ethereum.request({
     method: "eth_accounts",
   });
+
   if (accounts && accounts[0] > 0) {
-    setAuth((state) => ({ ...state, walletId: accounts[0] }));
+    setAuth((state) => ({ ...state, walletId: _.toLower(accounts[0]) }));
   }
+
   setLoading(false);
 };
 

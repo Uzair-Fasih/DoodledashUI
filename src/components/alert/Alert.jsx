@@ -25,14 +25,14 @@ export default function Alert() {
     [alertData]
   );
 
-  const onAccept = () => {
-    _.get(alertData, "onAccept", _.noop)();
+  const onAccept = async () => {
+    await _.get(alertData, "onAccept", _.noop)();
     setAlertVisibility(false);
     alertData.resolve();
   };
 
-  const onReject = () => {
-    _.get(alertData, "onReject", _.noop)();
+  const onReject = async () => {
+    await _.get(alertData, "onReject", _.noop)();
     setAlertVisibility(false);
     alertData.resolve();
   };

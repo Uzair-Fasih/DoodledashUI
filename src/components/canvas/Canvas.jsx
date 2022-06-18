@@ -3,23 +3,38 @@
  * The canvas should be workable on any screen size. The size of the canvas is the standard size for NFTs
  */
 
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useRef, useState, useContext, useMemo } from "react";
+import _ from "lodash";
 
 import TimeLocked from "./locks/time";
 import LoginLocked from "./locks/login";
+import Tooltip from "../tool-tip/Tooltip";
 
 import config from "./config.json";
 import CanvasManager from "./canvas.manager";
 
 import AuthContext from "../../context/Auth";
+import socket from "../../utilities/socket";
 
 import "./canvas.css";
-// import Instruction from "../instruction";
 import baseApi from "../../utilities/axios";
-import _ from "lodash";
+// import Instruction from "../instruction";
 
-const Canvas = ({ data }) => {
+const checkIfUserAllowed = (lineList = [], auth) => {
+  if (!auth.walletId) return false;
+  const myLine = lineList.find((line) => {
+    return line.addressInfo.address === auth.walletId;
+  });
+  return !myLine;
+};
+
+const Canvas = ({ data = {}, postLine }) => {
   const [auth] = useContext(AuthContext);
+  const isAllowed = useMemo(
+    () => checkIfUserAllowed(data.lineList, auth),
+    [data, auth]
+  );
+
   const canvasRef = useRef();
   const canvasManager = useRef();
 
@@ -47,11 +62,34 @@ const Canvas = ({ data }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    if (!canvasManager.current)
-      canvasManager.current = new CanvasManager(
-        canvasRef.current,
-        data.lineList
-      );
+    if (!canvasManager.current);
+    canvasManager.current = new CanvasManager(canvasRef.current, {
+      ...data,
+      meta: { walletId: auth.walletId },
+      actions: { postLine },
+    });
+    canvasManager.current.enable();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.walletId]);
+
+  // Auth user
+  useEffect(() => {
+    canvasManager.current.isAllowed = isAllowed;
+    if (!canvasManager.current) return;
+    if (!!auth.walletId && isAllowed && !data.isCompleted) {
+      canvasManager.current.meta = { walletId: auth.walletId };
+    } else if (!!auth.walletId) {
+      canvasManager.current.showTouchNotAllowed(data.isCompleted);
+    }
+  }, [auth.walletId, isAllowed, data.isCompleted]);
+
+  // Socket handling
+  useEffect(() => {
+    socket.on("message", ({ event, data }) => {
+      if (!canvasManager.current) return;
+      if (event === "art")
+        canvasManager.current.update(data.lineList, auth.walletId);
+    });
 
     // Handle resize
     window.addEventListener("resize", resizeHandler);
@@ -59,64 +97,40 @@ const Canvas = ({ data }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!canvasManager.current) return;
-    if (!!auth.walletId) canvasManager.current.enable();
-    else canvasManager.current.disable();
-  }, [auth.walletId]);
-
   return (
-    <canvas
-      className="mystery-machine"
-      width={canvasSideLength}
-      height={canvasSideLength}
-      ref={canvasRef}
-    ></canvas>
+    <React.Fragment>
+      <canvas
+        className="mystery-machine"
+        width={canvasSideLength}
+        height={canvasSideLength}
+        ref={canvasRef}
+      ></canvas>
+      {((!!auth.walletId && !isAllowed) ||
+        _.get(data, "isCompleted", true)) && <div className="completed"></div>}
+    </React.Fragment>
   );
 };
 
-const CanvasWidget = () => {
-  const [data, setData] = useState({ data: {}, isLoaded: false });
-  // const instruction = {
-  //   title: "Take part in art",
-  //   message: "Draw a line on the canvas to leave your mark on the doodle.",
-  // };
+const CanvasWidget = ({ canvasData }) => {
+  if (!canvasData.isLoaded) return;
 
-  useEffect(() => {
-    if (data.isLoaded) return;
-
-    const getData = async () => {
-      try {
-        const response = await baseApi.get("/art/active");
-        setData((state) => ({
-          ...state,
-          data: _.get(response, "data.data", {}),
-          isLoaded: true,
-        }));
-      } catch (err) {
-        setData((state) => ({ ...state, isLoaded: true }));
-      }
-    };
-
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (!data.isLoaded) return;
+  const postLine = (line) => {
+    return baseApi.post("/art/line", {
+      artId: _.get(canvasData, "data._id"),
+      line,
+    });
+  };
 
   return (
-    <TimeLocked>
+    <TimeLocked availableAt={canvasData.data.startedAt}>
       <LoginLocked>
         <div className="canvas-container">
-          <Canvas data={data.data} />
+          <Tooltip />
+          <Canvas data={canvasData.data} postLine={postLine} />
         </div>
       </LoginLocked>
     </TimeLocked>
   );
 };
-
-// <div className="instruction-container">
-//   <Instruction {...instruction} />
-// </div>;
 
 export default CanvasWidget;
