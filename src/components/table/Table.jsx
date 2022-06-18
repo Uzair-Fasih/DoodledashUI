@@ -51,19 +51,17 @@ const columns = [
     grow: 1,
   },
   {
-    name: "WalletId",
+    name: "Wallet Id",
     selector: (row) => row.addressInfo.address,
     grow: 2,
   },
   {
-    name: "Line",
+    name: "Location",
     selector: (row) => `🎨 (${row.x1}, ${row.y1}), (${row.x2}, ${row.y2})`,
-    hide: "sm",
   },
   {
     name: "Created At",
     selector: (row) => dayjs(row.createdAt).format("DD MMM YYYY h:mm A"),
-    hide: "md",
   },
 ];
 
