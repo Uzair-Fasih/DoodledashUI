@@ -13,9 +13,11 @@ export default function LoginLocked({ children }) {
     if (!auth.walletId) {
       await alertEvent({
         type: "primary",
-        title: "You aren't logged in",
-        message: "You need to login to take part in this doodle✨",
-        acceptButtonText: "Aww, okay 😦🙁",
+        title: "You need to conenct your wallet 🚧",
+        message:
+          "You need to conenct your wallet to take part in this doodle✨",
+        acceptButtonText: "Connect now",
+        onAccept: connectWallet,
       });
     }
   };

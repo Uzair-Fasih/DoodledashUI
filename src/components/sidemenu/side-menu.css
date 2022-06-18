@@ -27,17 +27,18 @@
   background-color: #212121;
 }
 
-.side-menu-open>.wallet-connect {
+.side-menu-open .wallet-connect {
   margin: 2rem auto;
+  display: block;
   width: calc(100% - 4rem);
   background-color: #fab000;
 }
 
-.side-menu-open>.user-detail {
+.side-menu-open .user-detail {
   margin: 2rem auto;
   width: calc(100% - 4rem);
   color: #fab000;
-  display: flex;
+  display: flex !important;
 }
 
 .side-menu-open .sidebar-routes {

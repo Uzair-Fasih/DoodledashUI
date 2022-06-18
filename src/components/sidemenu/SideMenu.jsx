@@ -19,7 +19,7 @@ export default function SideMenu({
           alt="< Back"
           onClick={() => setSidebar(false)}
         />
-        <WalletConnect auth={auth} />
+        <WalletConnect auth={auth} onClick={() => setSidebar(false)} />
         <div className="sidebar-routes">
           {routes.map((route) => (
             <Link

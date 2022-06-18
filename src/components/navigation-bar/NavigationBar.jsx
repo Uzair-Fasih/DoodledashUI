@@ -6,6 +6,7 @@ import "./navigation-bar.css";
 
 import { connectWallet } from "../../utilities/login/connect";
 import SideMenu from "../sidemenu/SideMenu";
+import _ from "lodash";
 
 const UserDetail = ({ walletId }) => {
   return (
@@ -72,11 +73,17 @@ export default function NavigationBar() {
   );
 }
 
-const WalletConnect = ({ auth }) => {
+const WalletConnect = ({ auth, onClick = _.noop }) => {
   return (
     <React.Fragment>
       {!auth.walletId && (
-        <button className="wallet-connect" onClick={connectWallet}>
+        <button
+          className="wallet-connect"
+          onClick={() => {
+            onClick();
+            connectWallet();
+          }}
+        >
           Connect Wallet
         </button>
       )}

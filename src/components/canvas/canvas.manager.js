@@ -135,7 +135,8 @@ export default class CanvasManager {
             await alertEvent({
               type: "primary",
               title: "Congratulations 🎉",
-              message: "Thank you for your contribution to art",
+              message:
+                "Thank you for your contribution to art. Join our discord group to stay in touch",
               acceptButtonText: "Love to see it",
             });
             this.isAllowed = false;
