@@ -343,7 +343,6 @@ const addShapeEventListener = (shape, stage, canvas) => {
 
   shape.addEventListener("mouseout", async (event) => {
     if (!shape.__selected) return;
-    if (event.nativeEvent.buttons) return;
     const scaleFactor = canvas.width / config.length;
 
     const target = event.target;

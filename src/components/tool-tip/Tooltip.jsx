@@ -50,14 +50,17 @@ export default function Tooltip() {
 
     const onClose = () => {
       setTooltipVisibility(false);
+      console.log("-- close");
       tooltipData.resolve();
     };
 
     document.addEventListener("tooltip", handle);
+    document.addEventListener("alert", onClose);
     window.addEventListener("scroll", onClose);
     window.addEventListener("resize", onClose);
     return () => {
       document.removeEventListener("tooltip", handle);
+      document.removeEventListener("alert", onClose);
       window.removeEventListener("scroll", onClose);
       window.removeEventListener("resize", onClose);
     };
