@@ -78,17 +78,19 @@ const Canvas = ({ data = {}, postLine }) => {
     if (!canvasManager.current) return;
     if (!!auth.walletId && isAllowed && !data.isCompleted) {
       canvasManager.current.meta = { walletId: auth.walletId };
-    } else if (!!auth.walletId) {
-      canvasManager.current.showTouchNotAllowed(data.isCompleted);
     }
   }, [auth.walletId, isAllowed, data.isCompleted]);
 
   // Socket handling
   useEffect(() => {
-    socket.on("message", ({ event, data }) => {
+    socket.on("message", ({ event, data: updateData }) => {
       if (!canvasManager.current) return;
-      if (event === "art")
-        canvasManager.current.update(data.lineList, auth.walletId);
+      if (event === "art") {
+        canvasManager.current.update(
+          _.last(updateData.lineList),
+          auth.walletId
+        );
+      }
     });
 
     // Handle resize

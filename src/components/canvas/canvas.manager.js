@@ -197,27 +197,31 @@ export default class CanvasManager {
   }
 
   // Updates
-  async update(lines, walletId) {
-    createjs.Ticker.on("tick", this.stage);
-    lines.forEach((lineData) => {
-      const { x1, y1, x2, y2, addressInfo, createdAt } = lineData;
-      if (addressInfo.address === walletId) return;
-      // because I'm lazy:
-      createjs.Ticker.on("tick", this.stage);
+  async update(lineData, walletId) {
+    const { x1, y1, x2, y2, addressInfo, createdAt } = lineData;
+    if (addressInfo.address === walletId) return;
 
-      const shape = getShape(
-        this.canvas,
-        x1,
-        y1,
-        undefined,
-        undefined,
-        {
-          walletId: addressInfo.address,
-          createdAt,
-        },
-        this.stage,
-        false
-      );
+    const wrapper = createjs.Ticker.on("tick", this.stage);
+    const shape = getShape(
+      this.canvas,
+      x1,
+      y1,
+      undefined,
+      undefined,
+      {
+        walletId: addressInfo.address,
+        createdAt,
+      },
+      this.stage,
+      false
+    );
+
+    const line = this.stage.addChild(shape);
+    const cmd = line.graphics.lineTo(x1, y1).command;
+    createjs.Tween.get(cmd, { loop: false }).to({ x: x2, y: y2 }, 1000);
+
+    setTimeout(() => {
+      createjs.Ticker.off("tick", wrapper);
       this.data.push({
         x1,
         y1,
@@ -226,13 +230,8 @@ export default class CanvasManager {
         addressInfo,
         createdAt: shape.__meta.createdAt,
       });
-      const line = this.stage.addChild(shape);
-      const cmd = line.graphics.lineTo(x1, y1).command;
-      createjs.Tween.get(cmd, { loop: false }).to({ x: x2, y: y2 }, 1000);
-      setTimeout(() => {
-        shape.__endAt(x2, y2);
-      }, 1000);
-    });
+      shape.__endAt(x2, y2);
+    }, 1000);
   }
 }
 
@@ -255,6 +254,7 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
   const scaleFactor = shouldScale ? canvas.width / config.length : 1;
   shape.graphics.clear();
   shape.cursor = "pointer";
+  addShapeEventListener(shape, stage);
 
   if (!_.isNil(meta)) {
     shape.__meta = meta;
@@ -268,7 +268,6 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
   if (!_.isNil(x2) && !_.isNil(y2)) {
     shape.graphics.lineTo(x2 * scaleFactor, y2 * scaleFactor);
     shape.graphics.closePath();
-    addShapeEventListener(shape, stage);
   }
 
   const reverseScaleFactor = config.length / canvas.width;
@@ -288,8 +287,6 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
 
     shape.__x2 = x2 * reverseScaleFactor;
     shape.__y2 = y2 * reverseScaleFactor;
-
-    addShapeEventListener(shape, stage);
     return true;
   };
 
@@ -347,19 +344,3 @@ const addShapeEventListener = (shape, stage) => {
     shape.__selected = false;
   });
 };
-
-// const getCoordinates = (canvas, event) => {
-//   const rect = canvas.getBoundingClientRect();
-//   let clientX = event.clientX;
-//   let clientY = event.clientY;
-
-//   if (event.type.startsWith("touch")) {
-//     clientX = event.changedTouches[0].clientX;
-//     clientY = event.changedTouches[0].clientY;
-//   }
-
-//   return {
-//     x: clientX - rect.left,
-//     y: clientY - rect.top,
-//   };
-// };
