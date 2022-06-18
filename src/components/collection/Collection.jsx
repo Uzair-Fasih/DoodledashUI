@@ -1,3 +1,4 @@
+import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import baseApi from "../../utilities/axios";
 
@@ -20,18 +21,25 @@ export default function Collection() {
   if (isLoading) return;
   return (
     <div id="collection" className="collection">
-      <div className="content-container">
+      <div className="content-container collection-content">
         <h1>Collection</h1>
-        <div className="collection-container">
-          {collections.map(({ imgUrl, visitUrl }, idx) => (
-            <CollectionFrame
-              key={idx}
-              imgUrl={imgUrl}
-              visitUrl={visitUrl}
-              idx={idx + 1}
-            />
-          ))}
-        </div>
+        {!_.isEmpty(collections) && (
+          <div className="collection-container">
+            {collections.map(({ imgUrl, visitUrl }, idx) => (
+              <CollectionFrame
+                key={idx}
+                imgUrl={imgUrl}
+                visitUrl={visitUrl}
+                idx={idx + 1}
+              />
+            ))}
+          </div>
+        )}
+        {_.isEmpty(collections) && (
+          <div className="no-doodles">
+            No doodles available. We will go live soon 😄
+          </div>
+        )}
       </div>
     </div>
   );

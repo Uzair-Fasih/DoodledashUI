@@ -104,6 +104,11 @@ export const loadWallet = async (setLoading, setAuth) => {
   // setLoading(false);
   // return;
 
+  // Check if user consents before loading wallet
+  const userConsent = localStorage.getItem("consent");
+
+  if (!userConsent) return setLoading(false);
+
   const ethereum = _.get(window, "ethereum");
   if (!ethereum) {
     setLoading(false);

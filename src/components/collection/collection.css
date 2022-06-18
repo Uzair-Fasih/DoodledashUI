@@ -20,6 +20,12 @@
   flex-wrap: wrap;
 }
 
+.collection-content {
+  min-height: 30rem;
+  display: flex;
+  flex-direction: column;
+}
+
 .collection-link {
   text-decoration: none;
   color: #212121;
@@ -72,6 +78,13 @@
 
 .collection-frame-data h2 {
   font-size: 2rem;
+}
+
+.no-doodles {
+  text-align: center;
+  margin: auto;
+  color: #212121;
+  font-size: 1.8rem;
 }
 
 @keyframes float {

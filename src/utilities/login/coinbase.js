@@ -35,8 +35,10 @@ export const connectCoinbaseWallet = async (handleErr, resolve) => {
       params: [],
     });
 
-    if (accounts && accounts[0] > 0) resolve(accounts[0]);
-    else handleErr(new Error("Something went wrong!"));
+    if (accounts && accounts[0] > 0) {
+      localStorage.setItem("consent", true);
+      resolve(accounts[0]);
+    } else handleErr(new Error("Something went wrong!"));
   } catch (err) {
     handleErr(err);
   }
