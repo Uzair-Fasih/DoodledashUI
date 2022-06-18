@@ -1,12 +1,14 @@
 import "./tool-tip.css";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
+import AuthContext from "../../context/Auth";
 const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 
 export default function Tooltip() {
   const [showTooltip, setTooltipVisibility] = useState(false);
+  const [auth] = useContext(AuthContext);
   const [tooltipData, setTooltipData] = useState({
     content: {
       x: 500,
@@ -77,8 +79,15 @@ export default function Tooltip() {
         ({ walletId, createdAt }, idx) => (
           <div key={idx} className="tooltip-section">
             <div className="wallet">
-              {walletId.slice(0, 6)}...
-              {walletId.slice(walletId.length - 4)}
+              {walletId !== auth.walletId && (
+                <React.Fragment>
+                  {walletId.slice(0, 6)}...
+                  {walletId.slice(walletId.length - 4)}
+                </React.Fragment>
+              )}
+              {walletId === auth.walletId && (
+                <React.Fragment>You</React.Fragment>
+              )}
             </div>
             <div className="date">
               placed a line {dayjs().to(dayjs(createdAt))}

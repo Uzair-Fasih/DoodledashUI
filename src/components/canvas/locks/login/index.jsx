@@ -15,7 +15,7 @@ export default function LoginLocked({ children }) {
         type: "primary",
         title: "You need to conenct your wallet 🚧",
         message:
-          "You need to conenct your wallet to take part in this doodle✨",
+          "You need to connect your wallet to take part in this doodledash✨",
         acceptButtonText: "Connect now",
         onAccept: connectWallet,
       });

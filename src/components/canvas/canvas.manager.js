@@ -1,6 +1,7 @@
 /* global createjs */
 import _ from "lodash";
 import alertEvent from "../alert/alertEvent";
+import Discord from "../social/Discord";
 import tooltipEvent from "../tool-tip/tooltipEvent";
 import config from "./config.json";
 
@@ -135,8 +136,7 @@ export default class CanvasManager {
             await alertEvent({
               type: "primary",
               title: "Congratulations 🎉",
-              message:
-                "Thank you for your contribution to art. Join our discord group to stay in touch",
+              Component: Discord,
               acceptButtonText: "Love to see it",
             });
             this.isAllowed = false;
@@ -146,7 +146,7 @@ export default class CanvasManager {
             reject();
           });
       },
-      rejectButtonText: "Lemme rethink",
+      rejectButtonText: "Lemme redo",
       onReject: () => {
         reject();
       },
@@ -209,8 +209,8 @@ export default class CanvasManager {
     } else if (this.isLoggedIn) {
       await alertEvent({
         type: "primary",
-        title: "You are already a part of this doodle",
-        message: "Keep an eye out for when the doodle goes live 😃",
+        title: "You are already a part of this doodledash",
+        message: "Keep an eye out for when the doodledash goes live 😃",
         acceptButtonText: "Okie dokie",
       });
     }
@@ -274,7 +274,7 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
   const scaleFactor = shouldScale ? canvas.width / config.length : 1;
   shape.graphics.clear();
   shape.cursor = "pointer";
-  addShapeEventListener(shape, stage);
+  addShapeEventListener(shape, stage, canvas);
 
   if (!_.isNil(meta)) {
     shape.__meta = meta;
@@ -287,10 +287,10 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
 
   if (!_.isNil(x2) && !_.isNil(y2)) {
     shape.graphics.lineTo(x2 * scaleFactor, y2 * scaleFactor);
-    shape.graphics.closePath();
+    shape.graphics.endStroke();
   }
 
-  const reverseScaleFactor = config.length / canvas.width;
+  const reverseScaleFactor = shouldScale ? 1 : config.length / canvas.width;
   // Custom methods
   shape.__x1 = x1 * reverseScaleFactor;
   shape.__y1 = y1 * reverseScaleFactor;
@@ -303,7 +303,7 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
     shape.graphics.beginStroke(config.color);
     shape.graphics.moveTo(x1 * scaleFactor, y1 * scaleFactor);
     shape.graphics.lineTo(x2 * scaleFactor, y2 * scaleFactor);
-    shape.graphics.closePath();
+    shape.graphics.endStroke();
 
     shape.__x2 = x2 * reverseScaleFactor;
     shape.__y2 = y2 * reverseScaleFactor;
@@ -313,25 +313,26 @@ const getShape = (canvas, x1, y1, x2, y2, meta, stage, shouldScale = true) => {
   return shape;
 };
 
-const addShapeEventListener = (shape, stage) => {
-  shape.addEventListener("click", async (event) => {
+const addShapeEventListener = (shape, stage, canvas) => {
+  shape.addEventListener("mouseover", async (event) => {
+    if (event.nativeEvent.buttons) return;
+    const scaleFactor = canvas.width / config.length;
+
     const target = event.target;
-
+    stage.tick();
     // Draw the target now with a highlight instead
-    stage.clear();
-    console.log(shape.__x1, shape.__y1, shape.__x2, shape.__y2);
-
     target.graphics
       .clear()
+      .setStrokeStyle(1, "round")
       .beginStroke("red")
-      .moveTo(shape.__x1, shape.__y1)
-      .lineTo(shape.__x2, shape.__y2)
-      .closePath();
-
-    stage.update();
+      .moveTo(shape.__x1 * scaleFactor, shape.__y1 * scaleFactor)
+      .lineTo(shape.__x2 * scaleFactor, shape.__y2 * scaleFactor)
+      .endStroke();
 
     const { clientX: x, clientY: y } = event.nativeEvent;
     shape.__selected = true;
+
+    stage.update();
 
     await tooltipEvent({
       isClosed: false,
@@ -340,27 +341,28 @@ const addShapeEventListener = (shape, stage) => {
     });
   });
 
-  shape.addEventListener("tick", async (event) => {
+  shape.addEventListener("mouseout", async (event) => {
     if (!shape.__selected) return;
-    if (!shape.nextTick) {
-      return (shape.nextTick = true);
-    }
+    if (event.nativeEvent.buttons) return;
+    const scaleFactor = canvas.width / config.length;
 
     const target = event.target;
-    stage.clear();
 
     target.graphics
       .clear()
+      .setStrokeStyle(1, "round")
       .beginStroke(config.color)
-      .moveTo(shape.__x1, shape.__y1)
-      .lineTo(shape.__x2, shape.__y2)
-      .closePath();
+      .moveTo(shape.__x1 * scaleFactor, shape.__y1 * scaleFactor)
+      .lineTo(shape.__x2 * scaleFactor, shape.__y2 * scaleFactor)
+      .endStroke();
+
+    stage.update();
 
     await tooltipEvent({
       isClosed: true,
     });
 
-    shape.nextTick = false;
+    // shape.nextTick = false;
     shape.__selected = false;
   });
 };
