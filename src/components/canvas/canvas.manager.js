@@ -101,7 +101,7 @@ export default class CanvasManager {
 
     if (!this.isAllowed) {
       reject();
-      if (this.isLoggedIn) this.showTouchNotAllowed();
+      this.showTouchNotAllowed();
       return false;
     }
 
@@ -177,6 +177,26 @@ export default class CanvasManager {
     stage.addEventListener("stagetouchend", actionEnd);
   }
 
+  disable() {
+    this.stage.enableDOMEvents(false);
+
+    // Common actions to fix bad actions
+    const actionStart = this.actionStart.bind(this);
+    const actionPreview = this.actionPreview.bind(this);
+    const actionEnd = this.actionEnd.bind(this);
+    const stage = this.stage;
+
+    // Desktop events
+    stage.removeEventListener("stagemousedown", actionStart);
+    stage.removeEventListener("stagemousemove", actionPreview);
+    stage.removeEventListener("stagemouseup", actionEnd);
+
+    // Mouse events
+    stage.removeEventListener("stagetouchstart", actionStart);
+    stage.removeEventListener("stagetouchmove", actionPreview);
+    stage.removeEventListener("stagetouchend", actionEnd);
+  }
+
   async showTouchNotAllowed() {
     if (this.isCompleted) {
       await alertEvent({
@@ -185,7 +205,7 @@ export default class CanvasManager {
         message: "Follow our social for a headsup on when we go live next 😃",
         acceptButtonText: "Okie dokie",
       });
-    } else {
+    } else if (this.isLoggedIn) {
       await alertEvent({
         type: "primary",
         title: "You are already a part of this doodle",
@@ -193,7 +213,6 @@ export default class CanvasManager {
         acceptButtonText: "Okie dokie",
       });
     }
-    // this.canvas.addEventListener("click", handler);
   }
 
   // Updates

@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import "./time-locked.css";
 import _ from "lodash";
 
+import { getSocial } from "../../../../utilities/cms";
+
 dayjs.extend(relativeTime);
 
 const pad = (n) => {
@@ -34,6 +36,10 @@ export default function TimeLocked({
     _.isNil(availableAt) ? true : new Date() > new Date(availableAt)
   );
   const [countdown, setCounter] = useState(getTimerContent(availableAt));
+  const [social, setSocial] = useState({
+    twitter: "https://twitter.com",
+    discord: "https://discord.com",
+  });
 
   useEffect(() => {
     if (!showContent) {
@@ -49,25 +55,35 @@ export default function TimeLocked({
     }
   });
 
+  useEffect(() => {
+    getSocial().then((response) => {
+      const res = _.chain(response)
+        .get("data.socialMediaPage")
+        .pick(["discord", "twitter"])
+        .value();
+      setSocial((state) => ({ ...state, ...res }));
+    });
+  }, []);
+
   if (showContent) return <React.Fragment>{children}</React.Fragment>;
   return (
-    <div className="time-locked">
-      <p>
-        This canvas will be available for drawing on
-        <br />
-        <b>{dayjs(availableAt).format("dddd, MMMM D, YYYY h:mm A")}</b>
-      </p>
-      <h2>{countdown}</h2>
-      <div className="time-locked-call-to-actions">
-        <a href="https://twitter.com">
-          <img src="/icons/twitter.svg" alt="Doodledash twitter" />
-        </a>
-        <a href="https://instagram.com">
-          <img src="/icons/instagram.svg" alt="Doodledash instagram" />
-        </a>
-        <a href="https://facebook.com">
-          <img src="/icons/facebook.svg" alt="Doodledash facebook" />
-        </a>
+    <div className="time-locked-parent">
+      <div className="time-locked">
+        <p>
+          This canvas will be available for drawing on
+          <br />
+          <b>{dayjs(availableAt).format("dddd, MMMM D, YYYY h:mm A")}</b>
+        </p>
+        <h2>{countdown}</h2>
+        <p>Follow us on social for heads up when the doodle goes live</p>
+        <div className="time-locked-call-to-actions">
+          <a href={social.twitter} target="_blank" rel="noreferrer">
+            <img src="/icons/twitter.svg" alt="Doodledash twitter" />
+          </a>
+          <a href={social.discord} target="_blank" rel="noreferrer">
+            <img src="/icons/discord.svg" alt="Doodledash instagram" />
+          </a>
+        </div>
       </div>
     </div>
   );

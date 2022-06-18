@@ -1,3 +1,8 @@
+.time-locked-parent {
+  display: grid;
+  place-items: center;
+}
+
 .time-locked {
   display: flex;
   flex-direction: column;
@@ -29,6 +34,7 @@
 .time-locked-call-to-actions {
   display: flex;
   flex-direction: row;
+  margin-top: 1.5rem;
 }
 
 .time-locked-call-to-actions>a {

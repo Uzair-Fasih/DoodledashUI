@@ -28,10 +28,10 @@ export default function NavigationBar() {
       name: "Draw",
       url: "#draw",
     },
-    // {
-    //   name: "Collection",
-    //   url: "/collection",
-    // },
+    {
+      name: "Collection",
+      url: "#collection",
+    },
     {
       name: "How it works",
       url: "#how-it-works",

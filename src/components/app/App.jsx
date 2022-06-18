@@ -13,6 +13,9 @@ import baseApi from "../../utilities/axios";
 import socket from "../../utilities/socket";
 
 import AuthContext from "../../context/Auth";
+import Collection from "../collection/Collection";
+import Footer from "../footer/Footer";
+import Announcement from "../announcement/Announcement";
 
 function App() {
   // eslint-disable-next-line no-unused-vars
@@ -56,6 +59,7 @@ function App() {
   return (
     <div className="App fade-in">
       <header className="App-header">
+        <Announcement />
         <NavigationBar />
       </header>
       <main className="App-body">
@@ -64,7 +68,9 @@ function App() {
           <Canvas canvasData={canvasData} />
         </div>
         <Table canvasData={canvasData} />
+        <Collection />
         <FAQ />
+        <Footer />
 
         <div className="guide-lines">
           <div className="guide-lines--line"></div>

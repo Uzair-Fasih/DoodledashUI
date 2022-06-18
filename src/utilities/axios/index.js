@@ -1,13 +1,20 @@
 import axios from "axios";
-
-const config = {
-  baseUrl: "https://blacklineapi.bothook.com/api",
-};
+import env from "../../env.json";
 
 const baseApi = axios.create({
-  baseURL: config.baseUrl,
+  baseURL: env.server.path,
 });
 baseApi.interceptors.response.use(function ({ data }) {
+  return data;
+});
+
+export const cmsApi = axios.create({
+  baseURL: env.cms.path,
+  headers: {
+    Authorization: `Bearer ${env.cms.token}`,
+  },
+});
+cmsApi.interceptors.response.use(function ({ data }) {
   return data;
 });
 
