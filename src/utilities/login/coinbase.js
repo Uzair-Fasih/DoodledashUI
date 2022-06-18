@@ -1,9 +1,6 @@
 const onboarding = {
   startOnboarding: function () {
-    window.open(
-      "https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad/related?hl=en&authuser=0",
-      "_blank"
-    );
+    window.open("https://www.coinbase.com/wallet", "_blank");
   },
 };
 const { ethereum } = window;

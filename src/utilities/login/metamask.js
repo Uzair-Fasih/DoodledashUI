@@ -1,6 +1,9 @@
-import MetaMaskOnboarding from "@metamask/onboarding";
+const onboarding = {
+  startOnboarding: function () {
+    window.open("https://metamask.io/", "_blank");
+  },
+};
 
-const onboarding = new MetaMaskOnboarding();
 const { ethereum } = window;
 
 export const isMetaMaskInstalled = () => {
