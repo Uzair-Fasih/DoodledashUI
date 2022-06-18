@@ -22,7 +22,11 @@ export default function SideMenu({
         <WalletConnect auth={auth} />
         <div className="sidebar-routes">
           {routes.map((route) => (
-            <Link to={route.url} key={route.url}>
+            <Link
+              to={route.url}
+              key={route.url}
+              onClick={() => setSidebar(false)}
+            >
               <p className="link">{route.name}</p>
             </Link>
           ))}

@@ -31,6 +31,7 @@ export default function TimeLocked({
   availableAt,
   completedAt,
   isCompleted,
+  nftLink,
   forceRender = _.noop,
   children,
 }) {
@@ -91,7 +92,15 @@ export default function TimeLocked({
             </React.Fragment>
           )}
 
-          {isCompleted && <b>DDLDH#1 is complete. Please visit link to buy.</b>}
+          {isCompleted && (
+            <b>
+              DDLDH#1 is complete.{" "}
+              {nftLink
+                ? `Please visit ${nftLink} to buy`
+                : "Check back later to see the minted doodle"}
+              .
+            </b>
+          )}
         </div>
       </React.Fragment>
     );

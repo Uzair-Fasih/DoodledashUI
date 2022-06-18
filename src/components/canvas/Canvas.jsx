@@ -131,6 +131,7 @@ const CanvasWidget = ({ canvasData }) => {
       availableAt={canvasData.data.startedAt}
       completedAt={canvasData.data.completedAt}
       isCompleted={canvasData.data.isCompleted}
+      nftLink={canvasData.data.nftLink}
     >
       <LoginLocked>
         <div className="canvas-container">
