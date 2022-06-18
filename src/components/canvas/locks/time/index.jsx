@@ -43,6 +43,12 @@ export default function TimeLocked({
     twitter: "https://twitter.com",
     discord: "https://discord.com",
   });
+  const [isCompletedIn, setIsCompleted] = useState(
+    new Date() > new Date(completedAt)
+  );
+  const [isAvailableIn, setIsAvailable] = useState(
+    new Date() > new Date(availableAt)
+  );
 
   useEffect(() => {
     if (!showContent) {
@@ -53,6 +59,7 @@ export default function TimeLocked({
           setShowContent(true);
           forceRender();
           clearInterval(interval);
+          setIsAvailable(true);
         }
       }, 1000);
     } else if (!isCompleted) {
@@ -61,11 +68,12 @@ export default function TimeLocked({
         setCounter(getTimerContent(completedAt));
         if (isCompletedNow) {
           clearInterval(interval);
+          setIsCompleted(true);
         }
       }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAvailableIn]);
 
   useEffect(() => {
     getSocial().then((response) => {
@@ -82,7 +90,7 @@ export default function TimeLocked({
       <React.Fragment>
         {children}
         <div className="completed-at-info">
-          {!isCompleted && (
+          {!isCompletedIn && (
             <React.Fragment>
               <p>
                 This canvas will be available until{" "}
@@ -92,12 +100,12 @@ export default function TimeLocked({
             </React.Fragment>
           )}
 
-          {isCompleted && (
+          {isCompletedIn && (
             <b>
               DDLDH#1 is complete.{" "}
               {nftLink
                 ? `Please visit ${nftLink} to buy`
-                : "Check back later to see the minted doodle"}
+                : "Check back later to see the minted doodledash"}
               .
             </b>
           )}
