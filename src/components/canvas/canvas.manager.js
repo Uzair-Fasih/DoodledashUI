@@ -101,7 +101,7 @@ export default class CanvasManager {
 
     if (!this.isAllowed) {
       reject();
-      this.showTouchNotAllowed();
+      if (this.isLoggedIn) this.showTouchNotAllowed();
       return false;
     }
 
@@ -177,8 +177,8 @@ export default class CanvasManager {
     stage.addEventListener("stagetouchend", actionEnd);
   }
 
-  async showTouchNotAllowed(isCompleted) {
-    if (isCompleted) {
+  async showTouchNotAllowed() {
+    if (this.isCompleted) {
       await alertEvent({
         type: "primary",
         title: "This doodle has ended",

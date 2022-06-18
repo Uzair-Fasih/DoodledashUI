@@ -74,7 +74,10 @@ const Canvas = ({ data = {}, postLine }) => {
 
   // Auth user
   useEffect(() => {
+    canvasManager.current.isLoggedIn = !!auth.walletId;
     canvasManager.current.isAllowed = isAllowed;
+    canvasManager.current.isCompleted = data.isCompleted;
+
     if (!canvasManager.current) return;
     if (!!auth.walletId && isAllowed && !data.isCompleted) {
       canvasManager.current.meta = { walletId: auth.walletId };
