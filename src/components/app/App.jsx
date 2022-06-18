@@ -1,4 +1,4 @@
-import "./app.css";
+import "./App.css";
 
 import _ from "lodash";
 import { useState, useEffect, useContext } from "react";
