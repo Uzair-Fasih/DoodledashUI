@@ -11,6 +11,12 @@ import {
   connectMetaMaskWallet,
 } from "../metamask";
 
+import {
+  isCoinbaseInstalled,
+  installCoinbase,
+  connectCoinbaseWallet,
+} from "../coinbase";
+
 const ConnectMetaMask = ({ handleErr, resolve }) => {
   if (!isMetaMaskInstalled()) {
     return (
@@ -31,6 +37,30 @@ const ConnectMetaMask = ({ handleErr, resolve }) => {
     >
       Connect MetaMask{" "}
       <img src="/icons/wallets/metamask.svg" alt="metamask-icon" />
+    </button>
+  );
+};
+
+const ConnectCoinbase = ({ handleErr, resolve }) => {
+  if (!isCoinbaseInstalled()) {
+    return (
+      <button
+        className="wallet-button"
+        onClick={() => installCoinbase(handleErr)}
+      >
+        Install Coinbase{" "}
+        <img src="/icons/wallets/coinbase.png" alt="metamask-icon" />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      className="wallet-button"
+      onClick={() => connectCoinbaseWallet(handleErr, resolve)}
+    >
+      Connect Coinbase{" "}
+      <img src="/icons/wallets/coinbase.png" alt="coinbase-icon" />
     </button>
   );
 };
@@ -64,6 +94,7 @@ const ConnectWallet = ({ onAccept = _.noop }) => {
     <div className="connect-wallet-call-to-actions">
       {error && <p className="error">{error}</p>}
       <ConnectMetaMask handleErr={handleErr} resolve={resolve} />
+      <ConnectCoinbase handleErr={handleErr} resolve={resolve} />
     </div>
   );
 };

@@ -1,13 +1,18 @@
-import MetaMaskOnboarding from "@metamask/onboarding";
-
-const onboarding = new MetaMaskOnboarding();
+const onboarding = {
+  startOnboarding: function () {
+    window.open(
+      "https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad/related?hl=en&authuser=0",
+      "_blank"
+    );
+  },
+};
 const { ethereum } = window;
 
-export const isMetaMaskInstalled = () => {
-  return Boolean(ethereum && ethereum.isMetaMask);
+export const isCoinbaseInstalled = () => {
+  return Boolean(ethereum && ethereum.isCoinbaseWallet);
 };
 
-export const installMetaMask = (handleErr) => {
+export const installCoinbase = (handleErr) => {
   try {
     onboarding.startOnboarding();
   } catch (err) {
@@ -15,13 +20,13 @@ export const installMetaMask = (handleErr) => {
   }
 };
 
-export const connectMetaMaskWallet = async (handleErr, resolve) => {
+export const connectCoinbaseWallet = async (handleErr, resolve) => {
   try {
     let provider = ethereum;
     // edge case if MM and CBW are both installed
     if (window.ethereum.providers?.length) {
       window.ethereum.providers.forEach(async (p) => {
-        if (p.isMetaMask) provider = p;
+        if (p.isCoinbase) provider = p;
       });
     }
 
