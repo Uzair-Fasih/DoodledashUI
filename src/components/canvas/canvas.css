@@ -20,6 +20,22 @@
   position: fixed;
   z-index: -1;
   top: 0;
+  display: block;
+  /* animation: killbackground 2s cubic-bezier(0.075, 0.82, 0.165, 1) 1s both; */
+  animation: killbackground 1s cubic-bezier(0.390, 0.575, 0.565, 1.000) 5s 1 forwards;
+  /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+}
+
+@keyframes killbackground {
+  0% {
+    opacity: 1;
+  }
+
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .canvas-container {

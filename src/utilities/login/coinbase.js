@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const onboarding = {
   startOnboarding: function () {
     window.open("https://www.coinbase.com/wallet", "_blank");
@@ -6,7 +8,12 @@ const onboarding = {
 const { ethereum } = window;
 
 export const isCoinbaseInstalled = () => {
-  return Boolean(ethereum && ethereum.isCoinbaseWallet);
+  return Boolean(
+    (ethereum && ethereum.isCoinbaseWallet) ||
+      _.get(ethereum, "providers", []).reduce((acc, val) => {
+        return (acc = acc || val.isCoinbaseWallet);
+      }, false)
+  );
 };
 
 export const installCoinbase = (handleErr) => {
@@ -21,9 +28,9 @@ export const connectCoinbaseWallet = async (handleErr, resolve) => {
   try {
     let provider = ethereum;
     // edge case if MM and CBW are both installed
-    if (window.ethereum.providers?.length) {
-      window.ethereum.providers.forEach(async (p) => {
-        if (p.isCoinbase) provider = p;
+    if (ethereum.providers?.length) {
+      ethereum.providers.forEach(async (p) => {
+        if (p.isCoinbaseWallet) provider = p;
       });
     }
 

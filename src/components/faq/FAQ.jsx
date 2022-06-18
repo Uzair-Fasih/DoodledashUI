@@ -4,6 +4,7 @@ import { marked } from "marked";
 
 import { getFAQ } from "../../utilities/cms";
 import "./faq.css";
+import Loading from "../loading/Loading";
 
 export default function FAQ() {
   const [isLoading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ export default function FAQ() {
 
   const html = useMemo(() => marked.parse(dangerousHTML), [dangerousHTML]);
 
-  if (isLoading) return null;
+  if (isLoading) return <Loading />;
   return (
     <div id="how-it-works" className="faq">
       {!_.isEmpty(dangerousHTML) && (

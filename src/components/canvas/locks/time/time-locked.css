@@ -19,6 +19,22 @@
     inset 0 -2px 6px 0 rgba(10, 37, 64, .35);
 }
 
+.completed-at-info {
+  margin-top: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.completed-at-info b,
+.completed-at-info p {
+  font-size: 1.5rem;
+}
+
+.completed-at-info h2 {
+  font-size: 3rem;
+}
+
 .time-locked>p,
 .time-locked>p>b {
   font-size: 1.6rem;

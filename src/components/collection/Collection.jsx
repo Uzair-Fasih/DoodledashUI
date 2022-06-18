@@ -1,6 +1,7 @@
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import baseApi from "../../utilities/axios";
+import Loading from "../loading/Loading";
 
 import "./collection.css";
 
@@ -18,7 +19,7 @@ export default function Collection() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (isLoading) return;
+  if (isLoading) return <Loading />;
   return (
     <div id="collection" className="collection">
       <div className="content-container collection-content">

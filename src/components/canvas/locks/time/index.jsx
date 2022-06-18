@@ -29,13 +29,15 @@ const getTimerContent = (availableAt) => {
 
 export default function TimeLocked({
   availableAt,
+  completedAt,
+  isCompleted,
   forceRender = _.noop,
   children,
 }) {
   const [showContent, setShowContent] = useState(
     _.isNil(availableAt) ? true : new Date() > new Date(availableAt)
   );
-  const [countdown, setCounter] = useState(getTimerContent(availableAt));
+  const [countdown, setCounter] = useState("--:--:--:--");
   const [social, setSocial] = useState({
     twitter: "https://twitter.com",
     discord: "https://discord.com",
@@ -52,8 +54,17 @@ export default function TimeLocked({
           clearInterval(interval);
         }
       }, 1000);
+    } else if (!isCompleted) {
+      const interval = setInterval(() => {
+        const isCompletedNow = new Date() > new Date(completedAt);
+        setCounter(getTimerContent(completedAt));
+        if (isCompletedNow) {
+          clearInterval(interval);
+        }
+      }, 1000);
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     getSocial().then((response) => {
@@ -65,7 +76,25 @@ export default function TimeLocked({
     });
   }, []);
 
-  if (showContent) return <React.Fragment>{children}</React.Fragment>;
+  if (showContent)
+    return (
+      <React.Fragment>
+        {children}
+        <div className="completed-at-info">
+          {!isCompleted && (
+            <React.Fragment>
+              <p>
+                This canvas will be available until{" "}
+                <b>{dayjs(completedAt).format("dddd, MMMM D, YYYY h:mm A")}</b>
+              </p>
+              <h2>{countdown}</h2>
+            </React.Fragment>
+          )}
+
+          {isCompleted && <b>DDLDH#1 is complete. Please visit link to buy.</b>}
+        </div>
+      </React.Fragment>
+    );
   return (
     <div className="time-locked-parent">
       <div className="time-locked">

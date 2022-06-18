@@ -1,8 +1,10 @@
 .faq {
-  background-color: #FFF;
-  padding: 10rem 0;
+  background-color: #f6f9fc;
+  padding: 5rem 0;
   z-index: -1;
-  position: relative
+  position: relative;
+  border-top: 1px solid rgba(66, 71, 112, 0.09);
+  border-bottom: 1px solid rgba(66, 71, 112, 0.09);
 }
 
 .faq h1 {

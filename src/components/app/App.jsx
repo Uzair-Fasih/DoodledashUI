@@ -1,21 +1,24 @@
 import "./App.css";
 
 import _ from "lodash";
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Alert from "../alert/Alert";
+import Announcement from "../announcement/Announcement";
 import NavigationBar from "../navigation-bar/NavigationBar";
 import Canvas from "../canvas/Canvas";
-import Alert from "../alert/Alert";
 import Table from "../table/Table";
 import FAQ from "../faq/FAQ";
+import Collection from "../collection/Collection";
+import Loading from "../loading/Loading";
 
 import { loadWallet } from "../../utilities/login/connect";
 import baseApi from "../../utilities/axios";
 import socket from "../../utilities/socket";
 
 import AuthContext from "../../context/Auth";
-import Collection from "../collection/Collection";
 import Footer from "../footer/Footer";
-import Announcement from "../announcement/Announcement";
 
 function App() {
   // eslint-disable-next-line no-unused-vars
@@ -55,7 +58,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (isLoading) return null;
+  if (isLoading) return <Loading />;
   return (
     <div className="App fade-in">
       <header className="App-header">
@@ -64,12 +67,12 @@ function App() {
       </header>
       <main className="App-body">
         <Alert />
-        <div id="draw" className="App-hero">
-          <Canvas canvasData={canvasData} />
-        </div>
-        <Table canvasData={canvasData} />
-        <Collection />
-        <FAQ />
+
+        <Routes>
+          <Route path="/" element={<Home canvasData={canvasData} />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/how-it-works" element={<FAQ />} />
+        </Routes>
         <Footer />
 
         <div className="guide-lines">
@@ -84,6 +87,17 @@ function App() {
   );
 }
 
+const Home = ({ canvasData }) => {
+  return (
+    <React.Fragment>
+      <div id="draw" className="App-hero">
+        <Canvas canvasData={canvasData} />
+      </div>
+      <Table canvasData={canvasData} />
+    </React.Fragment>
+  );
+};
+
 function AppWithProvider(props) {
   const authState = useState({
     walletId: null,
@@ -91,7 +105,9 @@ function AppWithProvider(props) {
 
   return (
     <AuthContext.Provider value={authState}>
-      <App {...props} />
+      <BrowserRouter>
+        <App {...props} />
+      </BrowserRouter>
     </AuthContext.Provider>
   );
 }

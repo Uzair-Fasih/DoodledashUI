@@ -1,9 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import AuthContext from "../../context/Auth";
 import Avatar from "./generateAvatar";
 import "./navigation-bar.css";
 
 import { connectWallet } from "../../utilities/login/connect";
+import SideMenu from "../sidemenu/SideMenu";
 
 const UserDetail = ({ walletId }) => {
   return (
@@ -23,18 +25,19 @@ const UserDetail = ({ walletId }) => {
 
 export default function NavigationBar() {
   const [auth] = useContext(AuthContext);
+  const [showSidebar, setSidebar] = useState(false);
   const routes = [
     {
       name: "Draw",
-      url: "#draw",
+      url: "/",
     },
     {
       name: "Collection",
-      url: "#collection",
+      url: "/collection",
     },
     {
       name: "How it works",
-      url: "#how-it-works",
+      url: "/how-it-works",
     },
   ];
 
@@ -44,19 +47,41 @@ export default function NavigationBar() {
 
       <div className="routes">
         {routes.map((route) => (
-          <a href={route.url} key={route.url}>
+          <Link to={route.url} key={route.url}>
             {route.name}
-          </a>
+          </Link>
         ))}
       </div>
 
-      <React.Fragment>
-        {!auth.walletId && (
-          <button onClick={connectWallet}>Connect Wallet</button>
-        )}
+      <WalletConnect auth={auth} />
 
-        {auth.walletId && <UserDetail walletId={auth.walletId} />}
-      </React.Fragment>
+      <img
+        className="menu-button"
+        src="/icons/menu.svg"
+        alt="Menu"
+        onClick={() => setSidebar(true)}
+      />
+
+      <SideMenu
+        routes={routes}
+        WalletConnect={WalletConnect}
+        showSidebar={showSidebar}
+        setSidebar={setSidebar}
+      />
     </div>
   );
 }
+
+const WalletConnect = ({ auth }) => {
+  return (
+    <React.Fragment>
+      {!auth.walletId && (
+        <button className="wallet-connect" onClick={connectWallet}>
+          Connect Wallet
+        </button>
+      )}
+
+      {auth.walletId && <UserDetail walletId={auth.walletId} />}
+    </React.Fragment>
+  );
+};

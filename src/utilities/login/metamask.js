@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const onboarding = {
   startOnboarding: function () {
     window.open("https://metamask.io/", "_blank");
@@ -7,7 +9,12 @@ const onboarding = {
 const { ethereum } = window;
 
 export const isMetaMaskInstalled = () => {
-  return Boolean(ethereum && ethereum.isMetaMask);
+  return Boolean(
+    (ethereum && ethereum.isMetaMask) ||
+      _.get(ethereum, "providers", []).reduce((acc, val) => {
+        return (acc = acc || val.isMetaMask);
+      }, false)
+  );
 };
 
 export const installMetaMask = (handleErr) => {
@@ -22,8 +29,8 @@ export const connectMetaMaskWallet = async (handleErr, resolve) => {
   try {
     let provider = ethereum;
     // edge case if MM and CBW are both installed
-    if (window.ethereum.providers?.length) {
-      window.ethereum.providers.forEach(async (p) => {
+    if (ethereum.providers?.length) {
+      ethereum.providers.forEach(async (p) => {
         if (p.isMetaMask) provider = p;
       });
     }

@@ -70,9 +70,20 @@ p {
   overflow: hidden;
 }
 
+.menu-button {
+  display: none;
+}
+
 @media screen and (max-width: 825px) {
-  .routes {
+
+  .routes,
+  .wallet-connect,
+  .user-detail {
     display: none;
+  }
+
+  .menu-button {
+    display: block;
   }
 
   .navigation-bar-logged-in {

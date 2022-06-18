@@ -127,7 +127,11 @@ const CanvasWidget = ({ canvasData }) => {
   };
 
   return (
-    <TimeLocked availableAt={canvasData.data.startedAt}>
+    <TimeLocked
+      availableAt={canvasData.data.startedAt}
+      completedAt={canvasData.data.completedAt}
+      isCompleted={canvasData.data.isCompleted}
+    >
       <LoginLocked>
         <div className="canvas-container">
           <Tooltip />

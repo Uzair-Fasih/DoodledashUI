@@ -21,15 +21,15 @@ export default function Announcement() {
       });
   }, []);
 
-  if (isLoading) return;
-
   return (
     <div className="announcement">
-      <div
-        className="content-contianer announcement-content"
-        dangerouslySetInnerHTML={{ __html: html }}
-        style={styling}
-      ></div>
+      {!isLoading && (
+        <div
+          className="content-contianer announcement-content"
+          dangerouslySetInnerHTML={{ __html: html }}
+          style={styling}
+        ></div>
+      )}
     </div>
   );
 }
