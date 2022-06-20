@@ -1,0 +1,11 @@
+.twitter-share {
+  background-color: #1d9bf0;
+  color: #fff;
+  margin: auto;
+  margin-top: 1rem;
+}
+
+.twitter-share img {
+  margin-left: 1rem;
+  filter: brightness(0) invert(1);
+}

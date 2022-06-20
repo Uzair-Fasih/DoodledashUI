@@ -17,3 +17,9 @@ export const getHeader = () => {
     query: `{ announcement { markdownContent styling } }`,
   });
 };
+
+export const getIntent = () => {
+  return cmsApi.post("/", {
+    query: `{ intent { url text hashtags via related } }`,
+  });
+};

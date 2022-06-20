@@ -1,7 +1,7 @@
 /* global createjs */
 import _ from "lodash";
 import alertEvent from "../alert/alertEvent";
-import Discord from "../social/Discord";
+import Discord from "../social/Social";
 import tooltipEvent from "../tool-tip/tooltipEvent";
 import config from "./config.json";
 
