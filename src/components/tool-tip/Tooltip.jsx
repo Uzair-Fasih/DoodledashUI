@@ -50,7 +50,6 @@ export default function Tooltip() {
 
     const onClose = () => {
       setTooltipVisibility(false);
-      console.log("-- close");
       tooltipData.resolve();
     };
 
