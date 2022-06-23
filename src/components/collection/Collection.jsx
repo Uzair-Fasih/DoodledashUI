@@ -1,5 +1,6 @@
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import baseApi from "../../utilities/axios";
 import Loading from "../loading/Loading";
 
@@ -46,11 +47,11 @@ export default function Collection() {
   );
 }
 
-const CollectionFrame = ({ imgUrl, idx, visitUrl }) => {
+const CollectionFrame = ({ imgUrl, idx }) => {
   return (
-    <a
+    <Link
+      to={`/doodledash/${idx}`}
       className="collection-link"
-      href={visitUrl}
       target="_blank"
       rel="noreferrer"
     >
@@ -60,6 +61,6 @@ const CollectionFrame = ({ imgUrl, idx, visitUrl }) => {
           <h2>DDLDSH#{idx}</h2>
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
