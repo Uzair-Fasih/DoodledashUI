@@ -11,6 +11,7 @@ import Canvas from "../canvas/Canvas";
 import Table from "../table/Table";
 import FAQ from "../faq/FAQ";
 import Collection from "../collection/Collection";
+import Profile from "../profile/Profile";
 import Loading from "../loading/Loading";
 
 import { loadWallet } from "../../utilities/login/connect";
@@ -72,6 +73,7 @@ function App() {
           <Route path="/" element={<Home canvasData={canvasData} />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/how-it-works" element={<FAQ />} />
+          <Route path="/doodledash/:id" element={<Profile />} />
         </Routes>
         <Footer />
 

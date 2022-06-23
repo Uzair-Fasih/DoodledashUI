@@ -28,7 +28,7 @@ const checkIfUserAllowed = (lineList = [], auth) => {
   return !myLine;
 };
 
-const Canvas = ({ data = {}, postLine }) => {
+const Canvas = ({ data = {}, postLine, isProfile = false }) => {
   const [auth] = useContext(AuthContext);
   const isAllowed = useMemo(
     () => checkIfUserAllowed(data.lineList, auth),
@@ -68,7 +68,8 @@ const Canvas = ({ data = {}, postLine }) => {
       meta: { walletId: auth.walletId },
       actions: { postLine },
     });
-    canvasManager.current.enable();
+
+    if (!isProfile) canvasManager.current.enable();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.walletId]);
 
@@ -116,7 +117,7 @@ const Canvas = ({ data = {}, postLine }) => {
   );
 };
 
-const CanvasWidget = ({ canvasData }) => {
+const CanvasWidget = ({ canvasData, isProfile = false }) => {
   if (!canvasData.isLoaded) return;
 
   const postLine = (line) => {
@@ -125,6 +126,15 @@ const CanvasWidget = ({ canvasData }) => {
       line,
     });
   };
+
+  if (isProfile) {
+    return (
+      <div className="canvas-container">
+        <Tooltip />
+        <Canvas data={canvasData.data} postLine={postLine} isProfile={true} />
+      </div>
+    );
+  }
 
   return (
     <TimeLocked
